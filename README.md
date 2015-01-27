@@ -4,6 +4,6 @@ The command to run MetaFinisherSC is
 
         python metaFinisherSC.py destinedFolder/ mummerPath/
         
-A test set is located here. 
+A test set is located here https://www.dropbox.com/sh/slahcgv55037aiv/AAAzkaP6HILdBlH2G_xapKYHa?dl=0  
 
         

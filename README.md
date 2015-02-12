@@ -1,5 +1,3 @@
-# workingMetaFinisherSC
-=======
 # MetaFinisherSC
 To run the tool, you should have input files(contigs.fasta, raw_reads.fasta) in destinedFolder. The tool will first run through FinisherSC to generate improved2.fasta to destinedFolder. Then it will go through the newly added functions suitable for metagenomics study and the final output file is **abun.fasta**
 The command to run MetaFinisherSC to use 20 threads(-par 20) is thus as follows. 

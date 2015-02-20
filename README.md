@@ -28,6 +28,8 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
         mkdir dataFolder
         
+        cd dataFolder
+        
         wget -O testset.zip  https://www.dropbox.com/sh/slahcgv55037aiv/AAAzkaP6HILdBlH2G_xapKYHa?dl=1
         
         unzip testset.zip

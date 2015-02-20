@@ -38,6 +38,8 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
 3. Go back to the main directory containing MetaFinisherSC and run the following two commands. Here we assume that /usr/bin/ is the path to your MUMmer.
         
+        cd ../
+
         python finisherSCCoreLib/finisherSC.py -par 20 dataFolder/ /usr/bin/
         
         python aSplitter.py -par 20 -rp improved2.fasta -ar True -rs 0 -rd True dataFolder/ /usr/bin/

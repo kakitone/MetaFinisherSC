@@ -57,8 +57,8 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
 NUCMER
 
-    [S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS]
+[S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS]
 =====================================================================================
-       1  5000000  |  5000000        1  |  5000000  5000000  |   100.00  | Segkk0	Segkk0
-       1  5000000  |  5000000        1  |  5000000  5000000  |   100.00  | Segkk1	Segkk1
+1  5000000  |  5000000        1  |  5000000  5000000  |   100.00  | Segkk0	Segkk0
+1  5000000  |  5000000        1  |  5000000  5000000  |   100.00  | Segkk1	Segkk1
 

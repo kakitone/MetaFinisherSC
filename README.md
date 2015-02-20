@@ -46,7 +46,7 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
 4. Now verify that the original contigs.fasta contain 4 contigs whereas the final abun.fasta contains 2 contigs
 
-        fgrep -o ">" datafolder/contigs.fasta  | wc -l
+        fgrep -o ">" dataFolder/contigs.fasta  | wc -l
         
         fgrep -o ">" dataFolder/abun.fasta  | wc -l
 

@@ -18,6 +18,7 @@ If you have enough computing resources, you can run
 
 ### Example ###
 Below is a step by step example on running MetaFinisherSC on the testset provided. 
+
 1. Clone MetaFinisherSC
         
         git clone https://github.com/kakitone/MetaFinisherSC.git

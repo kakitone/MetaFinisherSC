@@ -36,7 +36,7 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
         
         ls -lt
 
-3. Go back to the main directory containing MetaFinisherSC and run the following two commands. Here we assume that /usr/bin/ is the path to your MUMmer.
+3. Go back to the main directory containing MetaFinisherSC and run the following two commands. Here we assume that /usr/bin/ is the path to your MUMmer. This step can take a few minutes. 
         
         cd ../
 

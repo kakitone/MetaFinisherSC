@@ -84,7 +84,7 @@ def xPhased(folderName , mummerLink):
     # G.reportEdge()
     G.MBResolve()
     G.reportEdge()
-        
+    
     G.saveToFile(folderName, "condensedGraphMB.txt")
     graphFileName = "condensedGraphMB.txt"
     contigFile = "improved2_Double.fasta"

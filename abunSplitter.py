@@ -47,7 +47,7 @@ def satisfyMatch(initem ,newOutList, sd):
     targetItem = -1
     for outitem in newOutList:
         outIndex, outCt = outitem[0] , outitem[1]
-        if abs(outCt - inCt) < sd and inIndex != outIndex:
+        if abs(outCt - inCt) < 0.5*sd and inIndex != outIndex:
             targetItem = outIndex
             
     # Second check pt
@@ -55,7 +55,7 @@ def satisfyMatch(initem ,newOutList, sd):
     for outitem in newOutList:
         outIndex, outCt = outitem[0] , outitem[1]
         if outIndex != targetItem :
-            if abs(outCt - inCt) <= 1.1*sd :
+            if abs(outCt - inCt) <= 2.01*sd :
                 rejection = True
                 
     # Combined check 
@@ -91,121 +91,7 @@ def addEdges(G, resolvedList):
     for eachitem in resolvedList:
         G.insertEdge(eachitem[0], eachitem[1], 1997)
     
-def writeSegOut(ctgList, folderName):
-    f = open(folderName + "abun.fasta", 'w')
-    
-    for i in range(len(ctgList)):
-        f.write(">Segkk" + str(i) +'\n')
-        f.write(ctgList[i])
-        f.write("\n")
-    
-    f.close()
-    
-def checkIncluded(tmp, markedList):
-    isIncluded  = False
-    for i in tmp:
-        if markedList[i/2] == True:
-            isIncluded = True
-    return isIncluded
 
-
-def align(leftSeg, rightSeg, folderName, mummerLink):
-    overlap = 0 
-    lLen = 0
-    f = open(folderName + "leftSeg.fasta", 'w')
-    f.write(">SegL\n")
-    
-    if len(leftSeg) < 50000:
-        f.write(leftSeg)
-        lLen = len(leftSeg)
-    else:
-        f.write(leftSeg[-50000:])
-        lLen = 50000
-    f.close()
-    
-    rLen = 0
-    f = open(folderName + "rightSeg.fasta", 'w')
-    f.write(">SegR\n")
-    if len(rightSeg) < 50000:
-        f.write(rightSeg)
-        rLen  = len(rightSeg)
-    else:
-        f.write(rightSeg[0:50000])
-        rLen = 50000
-        
-    f.close()
-    
-    
-    alignerRobot.useMummerAlign(mummerLink, folderName, "overlap", "leftSeg.fasta", "rightSeg.fasta", False)
-    
-    dataList =  alignerRobot.extractMumData(folderName , "overlapOut")
-    
-    thres = 10
-    
-    if len(dataList) == 0:
-        overlap = 0
-    else:
-        myMax = -1
-        for eachitem in dataList:
-            if eachitem[1] > lLen - thres and eachitem[2] < thres:
-                if eachitem[4] > myMax:
-                    myMax = eachitem[4]
-        
-        overlap = myMax 
-                
-    
-    return overlap 
-    
-   
-def joinSeg(tmp, folderName, segLookUp, mummerLink):
-    ctg = segLookUp[tmp[0]]
-    
-    for i in range(len(tmp)-1):
-        overlap = align(segLookUp[tmp[i]], segLookUp[tmp[i+1]], folderName, mummerLink)
-        ctg = ctg + segLookUp[tmp[i+1]][overlap:]
-        
-    return ctg
-
-def readContigsFromFile(folderName, filename):
-    segLookUp = [] 
-    f = open(folderName + filename, 'r')
-    tmp = f.readline().rstrip()
-    tmpStr = ""
-    while len(tmp) > 0:
-        if tmp[0] == '>':
-            if len(tmpStr) > 0:
-                segLookUp.append(tmpStr)
-                tmpStr = ""
-        else:
-            tmpStr = tmpStr + tmp
-        tmp = f.readline().rstrip()
-     
-    if len(tmpStr) > 0: 
-        segLookUp.append(tmpStr)
-        tmpStr = ""
-    
-    f.close()
-    return segLookUp
-
-def extractGraphToContigs(G, folderName, mummerLink):
-    N1 = len(G.graphNodesList)
-    markedList = [False for i in range(N1/2)]
-    
-    segLookUp = readContigsFromFile(folderName, "improved3_Double.fasta")
-    
-    ctgList = []
-    for eachnode in G.graphNodesList:
-        if len(eachnode.nodeIndexList) > 0: 
-            tmp = eachnode.nodeIndexList 
-            isIncluded  = checkIncluded(tmp, markedList)
-            for eachitem in tmp: 
-                markedList[eachitem/2] = True
-            if not isIncluded :
-                ctg = joinSeg(tmp, folderName, segLookUp, mummerLink)
-                ctgList.append(ctg)
-    
-    writeSegOut(ctgList, folderName)
-            
 
 def abunSplit(folderName, mummerLink, myCountDic):
     
@@ -241,7 +127,7 @@ def abunSplit(folderName, mummerLink, myCountDic):
         addEdges(G, resolvedList)
         
     G.condense()
-    extractGraphToContigs(G, folderName, mummerLink)
+    IORobot.extractGraphToContigs(G, folderName, mummerLink, "abun.fasta", "improved3_Double.fasta")
     
     
 

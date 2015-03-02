@@ -8,7 +8,10 @@ abunGlobalRRDisable = False
 def replaceFiles( folderName, replacedName) :
     commandList = []
     commandList.append("cp " + folderName + "improved3.fasta " + folderName + "improved3_backup.fasta")
+    commandList.append("cp " + folderName + "improved3_Double.fasta " + folderName + "improved3_backup.fasta")
+    
     commandList.append("cp " + folderName + replacedName + " "+folderName + "improved3.fasta")
+    commandList.append("cp " + folderName + replacedName[0:-6]+"_Double.fasta " + folderName + "improved3_Double.fasta")
     
     for eachcommand in commandList:
         print eachcommand
@@ -49,11 +52,30 @@ def filterData(dataList, lenDic):
 
     return newDataList
 
+def filterDataIdentical(dataList, lenDic):
+    newDataList = []
+    for eachitem in dataList:
+        if not identicalItem(eachitem, lenDic):
+            newDataList.append(eachitem)
+
+    return newDataList
+
+def identicalItem(eachitem, lenDic):
+    start1, end1, start2, end2 = eachitem[0], eachitem[1], eachitem[2], eachitem[3]
+    thres = 20 
+    
+    endPt1 = lenDic[eachitem[-2]] - end1
+    endPt2 = lenDic[eachitem[-1]] - end2
+    
+    if abs(start1-start2) < thres and abs(endPt1 - endPt2) < thres:
+        return True
+    else:
+        return False
 
 def headTailMatch(eachitem, lenDic):
     start1, end1, start2, end2 = eachitem[0], eachitem[1], eachitem[2], eachitem[3]
     l1, l2 = lenDic[eachitem[-2]], lenDic[eachitem[-1]]
-    thres = 40 
+    thres = 10 
     
     
     diffContig , forwardStrand, headtailoverlap = False, False , False

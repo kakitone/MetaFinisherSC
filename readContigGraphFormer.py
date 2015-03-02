@@ -10,7 +10,9 @@ from finisherSCCoreLib import houseKeeper
 
 
 def addDataToList(dataList, G, startIndex1, startIndex2, type1, type2):
-    threshold = 40
+
+    threshold = 20
+    
     for eachitem in dataList:
         wt = min(eachitem[4] , eachitem[5])
         
@@ -22,10 +24,6 @@ def addDataToList(dataList, G, startIndex1, startIndex2, type1, type2):
             j = abunHouseKeeper.parseEdgeNameToID(eachitem[-1], type2) + startIndex2
             i = abunHouseKeeper.parseEdgeNameToID(eachitem[-2], type1) + startIndex1
         
-        if i == 5 and j == 3279 : 
-            print i, j , eachitem
-        if i == 3279 and j == 4 :
-            print i, j , eachitem
         
         G.insertEdge(i, j, wt) 
 
@@ -115,6 +113,14 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
     
         dataListRR = alignerRobot.extractMumData(folderName, header + "Out")
         dataListRR = abunHouseKeeper.filterData(dataListRR, lenDicRR)
+        for eachitem in dataListRR:
+            if eachitem[-2] == "Read164_p" and eachitem[-1] == "Read159_p" :    
+                print "debug" , eachitem
+            if eachitem[-1] == "Read164_p" and eachitem[-2] == "Read159_p" :    
+                print "debug" , eachitem
+            
+        dataListRR = abunHouseKeeper.filterDataIdentical(dataListRR, lenDicRR)
+
     else:
         dataListRR = []
     

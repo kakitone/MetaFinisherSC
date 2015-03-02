@@ -64,10 +64,11 @@ def getAllAssociatedReads(folderName, mummerLink,forFastaName):
     if N >0 :
         for trial in range(N):
             print "trial", trial
+            numberOfFiles = 20
             
             if True: 
                 workerList = []
-                numberOfFiles = 20
+                
                 for dummyI in range(1, numberOfFiles + 1):
                     indexOfMum = ""
                     if dummyI < 10:

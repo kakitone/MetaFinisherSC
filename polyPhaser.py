@@ -28,10 +28,13 @@ def mainFlow(folderName="SampleTest2/", mummerLink="MUMmer3.23/"):
     
     optionToRun = "xphase"
     
+    if True:
+        associatedReadFinder.getAllAssociatedReads(folderName, mummerLink,readsetFilename)
     
-    associatedReadFinder.getAllAssociatedReads(folderName, mummerLink,readsetFilename)
-    readContigGraphFormer.formReadContigStringGraph(folderName, mummerLink,contigFilename, readsetFilename, optTypeFileHeader , contigReadGraph )
-    repeatFinder.identifyRepeat(folderName, mummerLink,contigFilename,contigReadGraph, repeatFilename, optionToRun )
+        readContigGraphFormer.formReadContigStringGraph(folderName, mummerLink,contigFilename, readsetFilename, optTypeFileHeader , contigReadGraph )
+    
+        repeatFinder.identifyRepeat(folderName, mummerLink,contigFilename,contigReadGraph, repeatFilename, optionToRun )
+    
     repeatFlankingDefiner.defineRepeatAndFlanking(folderName, mummerLink,contigFilename,contigReadGraph,repeatFilename,repeatSpec )    
     
     performPhasing(folderName, mummerLink)

@@ -321,7 +321,7 @@ def extractEdgeSet(folderName, mummerLink, option="nopolish"):
     contigList, leftConnect, rightConnect, rawReadList = formbestpair(bestMatchPair,numberOfContig)
     print "contigList", contigList
     
-    writeContigReadCombine(blockedSet, dataSet, folderName, rawReadList, numberOfContig, contigList, leftConnect, option, rightConnect)
+    writeContigReadCombine(blockedSet, dataSet, folderName, rawReadList, numberOfContig, contigList, leftConnect, option, rightConnect, mummerLink)
 
 
 def formbestpair(bestMatchPair,numberOfContig):
@@ -393,7 +393,7 @@ def formbestpair(bestMatchPair,numberOfContig):
     return contigList, leftConnect, rightConnect, rawReadList
 
 
-def writeContigReadCombine(blockedSet, dataSet, folderName, rawReadList, numberOfContig, contigList, leftConnect, option, rightConnect):
+def writeContigReadCombine(blockedSet, dataSet, folderName, rawReadList, numberOfContig, contigList, leftConnect, option, rightConnect, mummerLink):
     # ## repeat aware logging
     # print "myExtraLinkList", myExtraLinkList
     # ## end repeat aware logging
@@ -495,18 +495,84 @@ def writeContigReadCombine(blockedSet, dataSet, folderName, rawReadList, numberO
         
         for eachseg, hidum in zip(eachcontig, range(len(eachcontig))):
             readNum = eachseg / 2
-            orientation = eachseg % 2
-            
+            orientation = eachseg % 2            
             newStart = 0 
-            
+    
+    
+            # Begin hack 
+            ### old statement 
             x , y , l = tmpStore, leftConnect[eachseg][1], tmpStore2
+            ### End old statement
+            
+            if hidum == 0:
+                x , y , l = tmpStore, leftConnect[eachseg][1], tmpStore2
+            else:
+                
+                prevseg = eachcontig[hidum-1]
+                
+                prevReadNum = prevseg/2
+                prevOrient = prevseg %2
+                
+                
+                if prevOrient == 0:
+                    leftSeg = readSet[prevReadNum]
+                else:
+                    leftSeg = houseKeeper.reverseComplement(readSet[prevReadNum])
+                    
+                rightSeg = tmpStore3
+                
+                overlapX = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
+                
+                leftSeg = tmpStore3
+                if orientation == 0:
+                    rightSeg = readSet[readNum] 
+                else:
+                    rightSeg = houseKeeper.reverseComplement(readSet[readNum])
+                    
+                overlapY = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
+                
+                
+                print "Before : x, y , l : ",  x, y , l 
+                x = overlapX[1]
+                y = overlapY[0]
+                l = tmpStore2
+                print "After : x, y , l : ",  x, y , l 
+                 
+            # End hack 
+            
             extraRead = ""
             if hidum == 0:
                 newStart = 0
             else:
                 
                 if l < x + y:
+                    # begin hack 
+                    ### old statement 
                     newStart = x + y - l
+                    ### end old statement 
+                    
+                    prevseg = eachcontig[hidum-1]
+                
+                    prevReadNum = prevseg/2
+                    prevOrient = prevseg %2
+                    
+                    if prevOrient == 0:
+                        leftSeg = readSet[prevReadNum]
+                    else:
+                        leftSeg = houseKeeper.reverseComplement(readSet[prevReadNum])
+                    
+                        
+                    if orientation == 0:
+                        rightSeg = readSet[readNum] 
+                    else:
+                        rightSeg = houseKeeper.reverseComplement(readSet[readNum])
+                    
+                    print "Before : ", newStart
+                    overlapNewStart = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
+                    newStart = overlapNewStart[1]
+                    print "After : ", newStart
+                    # end hack 
+                    
                 else:
                     newStart = 0
                     if option == 'polish':
@@ -672,7 +738,7 @@ def formMatchPairFromReadInfo(dataSet):
     
     matchPair = []
     for key, items in groupby(dataSet, itemgetter(0)):
-        print "key", key
+        # print "key", key
         left = []
         right = []
         

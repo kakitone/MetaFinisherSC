@@ -58,8 +58,21 @@ def skeletonIdentification(folderName, mummerLink, contigFilename, readsetFilena
     repeatFinder.identifyRepeat(folderName, mummerLink, contigFilename, contigReadGraph, repeatFilename, optionToRun)
     repeatFlankingDefiner.defineRepeatAndFlanking(folderName, mummerLink, contigFilename, contigReadGraph, repeatFilename, repeatSpec)
 
+def findCoverageFromRawData(folderName):
+    contigLenDic  = IORobot.obtainLength(folderName, "contigs.fasta")
+    readLenDic = IORobot.obtainLength(folderName, "raw_reads.fasta")
 
-
+    G = 0 
+    NL = 0 
+    for eachitem in contigLenDic:
+        G = G+ contigLenDic[eachitem]
+        
+    for eachitem in readLenDic:
+        NL = NL+ readLenDic[eachitem]
+    
+    c = (NL*1.0)/G 
+    print c 
+    return c 
 def DFSwithPath(G, x , pathList, N1, isTerminate):
     if not isTerminate:
         if x.visited == 0:
@@ -96,6 +109,8 @@ def resolvingTandem(folderName, mummerPath, contigReadGraph,contigFilename, read
     7. Join the contigs
     '''
     # 0 ) Load all the data
+    thres = 5 
+    
     G = graphLib.seqGraph(0)
     G.loadFromFile(folderName, contigReadGraph)
     lenDicCC = IORobot.obtainLength(folderName, contigFilename+"_Double.fasta")
@@ -115,7 +130,7 @@ def resolvingTandem(folderName, mummerPath, contigReadGraph,contigFilename, read
     dataListRR = abunHouseKeeper.filterData(dataListRR, lenDicRR)
     dataListRRDic = {}
     for eachitem in dataListRR: 
-        if eachitem[1] > eachitem[3]:
+        if eachitem[2] < thres:
             dataListRRDic[eachitem[-2] +";"+eachitem[-1]] = eachitem[4]
 
     header = optTypeFileHeader + "CR"
@@ -126,7 +141,7 @@ def resolvingTandem(folderName, mummerPath, contigReadGraph,contigFilename, read
     dataListCR = abunHouseKeeper.filterData(dataListCR, lenDicCR)
     dataListCRDic = {}
     for eachitem in dataListCR: 
-        if eachitem[1] > eachitem[3]:
+        if eachitem[2] < thres:
             dataListCRDic[eachitem[-2] +";"+eachitem[-1]] = eachitem[4]
 
     print dataListCRDic
@@ -220,11 +235,10 @@ def resolvingTandem(folderName, mummerPath, contigReadGraph,contigFilename, read
         # 5)
         totalBasesMatch = 0
         lrepeat = len(repeatContent)
-        c = 50 # Important parameters : FIX needed in production
+        c = findCoverageFromRawData(folderName)
         
-        #lengthDic = commonLib.obtainLength(folderName, readsetFilename+"_Double.fasta")
         
-        print "dataList[0]", dataList[0]
+        # print "dataList[0]", dataList[0]
         dataList.sort(key = itemgetter(-1))
         for key, values in  groupby(dataList,itemgetter(-1)):
             maxValue = -1
@@ -279,8 +293,12 @@ def resolvingTandem(folderName, mummerPath, contigReadGraph,contigFilename, read
                 maxItm = eachi
         
         print maxItm
-        repeatStart = maxItm[0]
-        contigEnd = maxItm[2]
+        if len(maxItm) > 0 :
+            repeatStart = maxItm[0]
+            contigEnd = maxItm[2]
+        else:
+            repeatStart = 0
+            contigEnd = -1
         # b) format return : prepare the repeat template 
         print "ct*lrepeat", int(repeatStart + ct*lrepeat)
         print "repeatStart", repeatStart
@@ -352,8 +370,11 @@ def mainFlowForTandemResolve(folderName, mummerPath):
     repeatSpec = "tandemRepeatSpecification.txt"
     
     optionToRun = "tandem"
-    colorNodes(folderName, mummerPath, sourceFilename, contigFilename, shortContigFilename)
-    skeletonIdentification(folderName, mummerPath, contigFilename, readsetFilename, optTypeFileHeader, contigReadGraph , repeatFilename, repeatSpec,optionToRun)
+
+    if True:
+        colorNodes(folderName, mummerPath, sourceFilename, contigFilename, shortContigFilename)
+        skeletonIdentification(folderName, mummerPath, contigFilename, readsetFilename, optTypeFileHeader, contigReadGraph , repeatFilename, repeatSpec,optionToRun)
+    
     resolvingTandem(folderName, mummerPath,contigReadGraph,contigFilename,readsetFilename, optTypeFileHeader, repeatSpec)
     
 

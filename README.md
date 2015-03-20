@@ -3,11 +3,11 @@
 
 Assume you have short reads (SR.fasta), long reads(LR.fasta) , contigs formed from short reads(SC.fasta), contigs formed from long reads(LC.fasta). 
 
-The final output is **abun.fasta** after running through the mis-assembly fixing, FinisherSC and A-Splitter(join contigs based on abundance information). 
+The final output is **abun.fasta** after running through the M-Fixer(mis-assembly fixing), FinisherSC and A-Splitter(join contigs based on abundance information). 
 
 In order to do that, here are the steps. 
 
-1. Run MFixer which merge contigs with information from reads. It also fixes misassembly
+1. Run M-Fixer which merge contigs with information from reads. It also fixes misassembly
 
         python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 destinedFolder mummerPath 
 
@@ -15,7 +15,7 @@ In order to do that, here are the steps.
 
         python -m srcRefactor.repeatPhaserLib.finisherSCCoreLib.finisherSC -par 20 destinedFolder mummerPath
             
-3. Run ASplitter to join contigs based on abundance information (to run faster, you can use the -ar True -rs 0 -rd True )
+3. Run A-Splitter to join contigs based on abundance information (to run faster, you can use the -ar True -rs 0 -rd True )
 
         python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 -rp improved2.fasta  destinedFolder mummerPath
 
@@ -25,11 +25,11 @@ In order to do that, here are the steps.
 
 Assume you have your long reads (LR.fasta) and contigs formed from long reads (LC.fasta). 
 
-The final output is **abun.fasta** after running through the mis-assembly fixing, FinisherSC and A-Splitter(join contigs based on abundance information). 
+The final output is **abun.fasta** after running through the M-Fixer(mis-assembly fixing), FinisherSC and A-Splitter(join contigs based on abundance information). 
 
 In order to do that, here are the steps. 
 
-1. Run MFixer which merge contigs with information from reads. It also fixes misassembly
+1. Run M-Fixer which merge contigs with information from reads. It also fixes misassembly
 
         python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 -t LR destinedFolder mummerPath 
 
@@ -39,7 +39,7 @@ In order to do that, here are the steps.
         python -m srcRefactor.repeatPhaserLib.finisherSCCoreLib.finisherSC -par 20 destinedFolder mummerPath
 
 
-3. Run ASplitter to join contigs based on abundance information (to run faster, you can use the -ar True -rs 0 -rd True )
+3. Run A-Splitter to join contigs based on abundance information (to run faster, you can use the -ar True -rs 0 -rd True )
 
         python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 -rp improved2.fasta destinedFolder mummerPath
 

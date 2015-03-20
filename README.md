@@ -78,9 +78,9 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
 4. Now verify that the original LR.fasta contain 4 contigs whereas the final abun.fasta contains 2 contigs
 
-        fgrep -o ">" dataFolder/LR.fasta  | wc -l
+        fgrep -o ">" dataFolder/LC.fasta  | wc -lc
         
-        fgrep -o ">" dataFolder/abun.fasta  | wc -l
+        fgrep -o ">" dataFolder/abun.fasta  | wc -lc
 
 
 5. Align the abun.fasta with reference.fasta. 

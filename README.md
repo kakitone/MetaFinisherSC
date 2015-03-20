@@ -1,4 +1,52 @@
 # MetaFinisherSC
+### Mixed read type and mixed contig type###
+
+Assume you have short reads (SR.fasta), long reads(LR.fasta) , contigs formed from short reads(SC.fasta), contigs formed from long reads(LC.fasta). 
+
+The final output is **abun.fasta** after running through the mis-assembly fixing, FinisherSC and A-Splitter(join contigs based on abundance information). 
+
+In order to do that, here are the steps. 
+
+1. Run merger.py which merge contigs with information from reads. It also fixes misassembly
+
+	python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 destinedFolder mummerPath 
+
+2. Run FinisherSC to join the contigs together based on overlap information
+
+	python -m srcRefactor.repeatPhaserLib.finisherSCCoreLib.finisherSC -par 20 destinedFolder mummerPath
+            
+3. Run ASplitter to join contigs based on abundance information (to run faster, you can use the -ar True -rs 0 -rd True )
+
+	python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 -rp improved2.fasta  destinedFolder mummerPath
+
+
+
+### Only long reads and contigs formed from long reads ###
+
+Assume you have your long reads (LR.fasta) and contigs formed from long reads (LC.fasta). 
+
+The final output is **abun.fasta** after running through the mis-assembly fixing, FinisherSC and A-Splitter(join contigs based on abundance information). 
+
+In order to do that, here are the steps. 
+
+1. Run merger.py which merge contigs with information from reads. It also fixes misassembly
+
+	python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 -t LR destinedFolder mummerPath 
+
+
+2. Run FinisherSC to join the contigs together based on overlap information
+
+	python -m srcRefactor.repeatPhaserLib.finisherSCCoreLib.finisherSC -par 20 destinedFolder mummerPath
+
+
+3. Run ASplitter to join contigs based on abundance information (to run faster, you can use the -ar True -rs 0 -rd True )
+
+	python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 -rp improved2.fasta destinedFolder mummerPath
+
+
+
+
+
 ### Introduction ###
 To run the tool, you should have input files(contigs.fasta, raw_reads.fasta) in destinedFolder. The tool will first run through FinisherSC to generate improved2.fasta to destinedFolder. Then it will go through the newly added functions suitable for metagenomics study and the final output file is **abun.fasta**
 The command to run MetaFinisherSC to use 20 threads(-par 20) is thus as follows. 

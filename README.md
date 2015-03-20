@@ -91,16 +91,17 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
 6. You should now see 
 
-NUCMER
+        NUCMER
+        
+        |[S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS] |
+        |---------------|--------------------|--------------------|-----------|--------|
+        |       1  4999997  |  4999999        1  |  4999997  4999999  |    99.99  | Segkk0	Segkk0|
+        | 2490000  2500003  |  2510000  2500001  |    10004    10000  |    99.59  | Segkk1	Segkk0|
+        |       1  5000004  |  4999999        1  |  5000004  4999999  |    99.99  | Segkk1	Segkk1|
+        | 2490000  2499997  |  2510000  2500001  |     9998    10000  |    99.29  | Segkk0	Segkk1|
 
-|[S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS] |
-|---------------|--------------------|--------------------|-----------|--------|
-|       1  4999997  |  4999999        1  |  4999997  4999999  |    99.99  | Segkk0	Segkk0|
-| 2490000  2500003  |  2510000  2500001  |    10004    10000  |    99.59  | Segkk1	Segkk0|
-|       1  5000004  |  4999999        1  |  5000004  4999999  |    99.99  | Segkk1	Segkk1|
-| 2490000  2499997  |  2510000  2500001  |     9998    10000  |    99.29  | Segkk0	Segkk1|
 
-As a check, you may also want to see that there is really a 10K long repeat in the reference across the species. This can be seen by 
+7. As a check, you may also want to see that there is really a 10K long repeat in the reference across the species. This can be seen by 
 
         nucmer  -maxmatch dataFolder/reference.fasta dataFolder/reference.fasta         
 
@@ -108,11 +109,11 @@ As a check, you may also want to see that there is really a 10K long repeat in t
 
 
 
-NUCMER
-
-|[S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS] |
-|---------------|--------------------|--------------------|-----------|--------|
-|       1  5000000  |        1  5000000  |  5000000  5000000  |   100.00  | Segkk0	Segkk0|
-| 2500001  2510000  |  2500001  2510000  |    10000    10000  |   100.00  | Segkk1	Segkk0|
-|       1  5000000  |        1  5000000  |  5000000  5000000  |   100.00  | Segkk1	Segkk1|
-| 2500001  2510000  |  2500001  2510000  |    10000    10000  |   100.00  | Segkk0	Segkk1|
+        NUCMER
+        
+        |[S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS] |
+        |---------------|--------------------|--------------------|-----------|--------|
+        |       1  5000000  |        1  5000000  |  5000000  5000000  |   100.00  | Segkk0	Segkk0|
+        | 2500001  2510000  |  2500001  2510000  |    10000    10000  |   100.00  | Segkk1	Segkk0|
+        |       1  5000000  |        1  5000000  |  5000000  5000000  |   100.00  | Segkk1	Segkk1|
+        | 2500001  2510000  |  2500001  2510000  |    10000    10000  |   100.00  | Segkk0	Segkk1|

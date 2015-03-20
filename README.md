@@ -31,17 +31,17 @@ In order to do that, here are the steps.
 
 1. Run MFixer which merge contigs with information from reads. It also fixes misassembly
 
-	python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 -t LR destinedFolder mummerPath 
+        python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 -t LR destinedFolder mummerPath 
 
 
 2. Run FinisherSC to join the contigs together based on overlap information
 
-	python -m srcRefactor.repeatPhaserLib.finisherSCCoreLib.finisherSC -par 20 destinedFolder mummerPath
+        python -m srcRefactor.repeatPhaserLib.finisherSCCoreLib.finisherSC -par 20 destinedFolder mummerPath
 
 
 3. Run ASplitter to join contigs based on abundance information (to run faster, you can use the -ar True -rs 0 -rd True )
 
-	python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 -rp improved2.fasta destinedFolder mummerPath
+        python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 -rp improved2.fasta destinedFolder mummerPath
 
 
 

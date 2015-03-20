@@ -76,7 +76,7 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
         
         python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 -rp improved2.fasta -ar True -rs 0 -rd True dataFolder/ /usr/bin/
 
-4. Now verify that the original LR.fasta contain 4 contigs whereas the final abun.fasta contains 2 contigs
+4. Now verify that the original LC.fasta contain 4 contigs whereas the final abun.fasta contains 2 contigs
 
         fgrep -o ">" dataFolder/LC.fasta  | wc -lc
         

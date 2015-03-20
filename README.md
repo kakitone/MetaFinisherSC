@@ -52,7 +52,7 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
         
         git clone https://github.com/kakitone/MetaFinisherSC.git
         
-2. Get into the MetaFinisherSC folder, create directory to hold the data, download data from Dropbox and check to see if you get everything(contigs.fasta, raw_reads.fasta, reference.fasta). 
+2. Get into the MetaFinisherSC folder, create directory to hold the data, download data from Dropbox and check to see if you get everything(LC.fasta, LR.fasta, reference.fasta). 
         
         cd MetaFinisherSC/        
 

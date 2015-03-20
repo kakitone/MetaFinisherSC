@@ -7,17 +7,17 @@ The final output is **abun.fasta** after running through the mis-assembly fixing
 
 In order to do that, here are the steps. 
 
-1. Run merger.py which merge contigs with information from reads. It also fixes misassembly
+1. Run MFixer which merge contigs with information from reads. It also fixes misassembly
 
-	python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 destinedFolder mummerPath 
+        python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 destinedFolder mummerPath 
 
 2. Run FinisherSC to join the contigs together based on overlap information
 
-	python -m srcRefactor.repeatPhaserLib.finisherSCCoreLib.finisherSC -par 20 destinedFolder mummerPath
+        python -m srcRefactor.repeatPhaserLib.finisherSCCoreLib.finisherSC -par 20 destinedFolder mummerPath
             
 3. Run ASplitter to join contigs based on abundance information (to run faster, you can use the -ar True -rs 0 -rd True )
 
-	python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 -rp improved2.fasta  destinedFolder mummerPath
+        python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 -rp improved2.fasta  destinedFolder mummerPath
 
 
 
@@ -29,7 +29,7 @@ The final output is **abun.fasta** after running through the mis-assembly fixing
 
 In order to do that, here are the steps. 
 
-1. Run merger.py which merge contigs with information from reads. It also fixes misassembly
+1. Run MFixer which merge contigs with information from reads. It also fixes misassembly
 
 	python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 -t LR destinedFolder mummerPath 
 
@@ -45,27 +45,8 @@ In order to do that, here are the steps.
 
 
 
-
-
-### Introduction ###
-To run the tool, you should have input files(contigs.fasta, raw_reads.fasta) in destinedFolder. The tool will first run through FinisherSC to generate improved2.fasta to destinedFolder. Then it will go through the newly added functions suitable for metagenomics study and the final output file is **abun.fasta**
-The command to run MetaFinisherSC to use 20 threads(-par 20) is thus as follows. 
-
-        python finisherSCCoreLib/finisherSC.py -par 20 destinedFolder/ mummerPath/
-
-        python aSplitter.py -par 20 -rp improved2.fasta -ar True -rs 0 -rd True destinedFolder/ mummerPath/
-
-
-A test set is located here https://www.dropbox.com/sh/slahcgv55037aiv/AAAzkaP6HILdBlH2G_xapKYHa?dl=0  
-
-If you have enough computing resources, you can run 
-
-        python finisherSCCoreLib/finisherSC.py -par 48 destinedFolder/ mummerPath/
-
-        python aSplitter.py -par 48 -rp improved2.fasta destinedFolder/ mummerPath/
-
 ### Example ###
-Below is a step by step example on running MetaFinisherSC on the testset provided. 
+Below is a step by step example on running MetaFinisherSC on the testset provided(for simplicity we use the only long read mode here). 
 
 1. Clone MetaFinisherSC
         
@@ -89,9 +70,11 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
         
         cd ../
 
-        python finisherSCCoreLib/finisherSC.py -par 20 dataFolder/ /usr/bin/
+        python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 -t LR dataFolder/ /usr/bin/
         
-        python aSplitter.py -par 20 -rp improved2.fasta -ar True -rs 0 -rd True dataFolder/ /usr/bin/
+        python -m srcRefactor.repeatPhaserLib.finisherSCCoreLib.finisherSC dataFolder/ /usr/bin/
+        
+        python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 -rp improved2.fasta -ar True -rs 0 -rd True dataFolder/ /usr/bin/
 
 4. Now verify that the original contigs.fasta contain 4 contigs whereas the final abun.fasta contains 2 contigs
 

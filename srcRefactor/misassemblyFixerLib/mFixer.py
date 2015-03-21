@@ -33,6 +33,13 @@ elif args['LCReads'] == "SR":
 
 pathExists, newFolderName, newMummerLink = houseKeeper.checkingPath(args['folderName'] , args['mummerLink'], False)
 
+fileList = ["SC.fasta", "LC.fasta", "SR.fasta", "LR.fasta"]
+
+for eachitem in fileList:
+        os.system("sed -e 's/|//g' " + newFolderName + eachitem+"  > " + newFolderName + "tmp.fasta")
+        os.system("cp " + newFolderName + "tmp.fasta " + newFolderName + eachitem )
+
+
 if merger.mergerGlobalLCReads == "SR":
     merger.mergeContigs(newFolderName , newMummerLink)
     

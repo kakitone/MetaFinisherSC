@@ -219,7 +219,7 @@ def findOutliners(tDiffVec, sd, T):
                 continue
             else:
                 outLiners.append(index)
-                for j in range(index - T,  index+ T+1):
+                for j in range(max(index - T,0),  min(index+ T+1,n)):
                     deletedList[j] = True
     
     return outLiners
@@ -499,8 +499,8 @@ def findPartner(seedList, oldList, gapLen):
         if eachitem[2] == 'L':
             searchitem = [eachitem[0], eachitem[1]]
             i = bisect.bisect(rList, searchitem)
-            assert(0 <= rList[i][1] - eachitem[1])
-            if  rList[i][1] - eachitem[1]  < gapLen:
+            # assert(0 <= rList[i][1] - eachitem[1])
+            if  i< len(rList) and rList[i][1] - eachitem[1]  < gapLen:
                 insertItem = [eachitem[0], eachitem[1],rList[i][1] ,eachitem[-1],rList[i][-1] ]
                 partnerList.append(insertItem)
             else:
@@ -510,9 +510,9 @@ def findPartner(seedList, oldList, gapLen):
         elif eachitem[2] == 'R':
             searchitem = [eachitem[0], eachitem[1]]
             i = bisect.bisect(lList, searchitem)
-            assert(0<= eachitem[1] - lList[i-1][1])
+            #assert(0<= eachitem[1] - lList[i-1][1])
             
-            if  eachitem[1] - lList[i-1][1]  < gapLen:
+            if  i> 0 and eachitem[1] - lList[i-1][1]  < gapLen:
                 insertItem = [eachitem[0], lList[i-1][1], eachitem[1], lList[i-1][-1], eachitem[-1]]
                 partnerList.append(insertItem)
             else:
@@ -582,8 +582,8 @@ def alignLR2SC(folderName, mummerLink):
             
             if maxLlen > toMatchThres and maxRlen > toMatchThres:
                 if abs(Rseek[1] - Lseek[0]) > gapSingleRd:
-                    bkPtList.append([Rseek[-2], Rseek[1], 'R', Rseek[-1] ])
-                    bkPtList.append([Lseek[-2], Lseek[0], 'L', Lseek[-1] ])
+                    bkPtList.append([Rseek[-2], Rseek[1]-1, 'R', Rseek[-1] ])
+                    bkPtList.append([Lseek[-2], Lseek[0]-1, 'L', Lseek[-1] ])
      
     breakDic = {} 
     bkPtList.sort()
@@ -638,7 +638,7 @@ def breakSC(folderName, mummerLink):
             
             brokenContigList = brokenContigList + contigBreakDown
         else:
-            brokenContigList = contigList[eachitem]
+            brokenContigList = brokenContigList + [contigList[eachitem]]
             
     IORobot.writeSegOut(brokenContigList, folderName, "SC_n.fasta")
      

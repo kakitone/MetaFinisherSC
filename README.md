@@ -72,7 +72,7 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
         python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 -t LR dataFolder/ /usr/bin/
         
-        python -m srcRefactor.repeatPhaserLib.finisherSCCoreLib.finisherSC dataFolder/ /usr/bin/
+        python -m srcRefactor.repeatPhaserLib.finisherSCCoreLib.finisherSC -par 20  dataFolder/ /usr/bin/
         
         python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 -rp improved2.fasta -ar True -rs 0 -rd True dataFolder/ /usr/bin/
 

@@ -1,6 +1,7 @@
 from ..repeatPhaserLib.finisherSCCoreLib import IORobot
 from ..repeatPhaserLib.finisherSCCoreLib import alignerRobot
-from ..repeatPhaserLib.finisherSCCoreLib import nonRedundantResolver 
+from ..repeatPhaserLib.finisherSCCoreLib import nonRedundantResolver
+from ..repeatPhaserLib.finisherSCCoreLib import houseKeeper 
 import bisect
 
 
@@ -308,10 +309,20 @@ def breakAcBkPts(contig, modifiedOutliners):
 
     
 
-def breakAcBkPtsTwoSided(contig, modifiedOutliners, folderName, mummerLink):
+def breakAcBkPtsTwoSided(contig, modifiedOutlinersOld, folderName, mummerLink):
     contigBreakDown = []
     
-    modifiedOutliners.sort()
+    
+    modifiedOutliners = [] 
+    for eachitem in modifiedOutlinersOld:
+        tmpList = []
+        if eachitem[1] != None:
+            tmpList = tmpList + eachitem + [eachitem[1]]
+        elif eachitem[2] != None:  
+            tmpList = tmpList + eachitem + [eachitem[2]]
+        modifiedOutliners.append(tmpList)
+    
+    modifiedOutliners.sort(key = itemgetter(-1))
     
     segList = []
     
@@ -342,16 +353,40 @@ def breakAcBkPtsTwoSided(contig, modifiedOutliners, folderName, mummerLink):
         if leftRead != None:
             leftSeg, rightSeg = IORobot.myRead(folderName, "LR.fasta",leftRead ), contig[begin:end] 
             overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
-            print "overlap:", overlap
-            
-            leftpart = leftSeg[0:len(leftSeg)-overlap[0]]
+                        
+            if overlap[0] >0:
+                leftpart = leftSeg[0:len(leftSeg)-overlap[0]]
+                print "overlap:", overlap
+            else:
+                leftSeg = houseKeeper.reverseComplement(leftSeg)
+                overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
+                
+                if overlap[0] > 0:
+                    leftpart = leftSeg[0:len(leftSeg)-overlap[0]]
+                    print "overlap:", overlap
+                else:
+                    leftpart = ""
+                    print "overlap error ? :", overlap 
+                
           
         if rightRead != None:
             leftSeg, rightSeg = contig[begin:end], IORobot.myRead(folderName, "LR.fasta",rightRead ) 
             overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
-            print "overlap:", overlap
+
+            if overlap[1] > 0:
+                rightpart = rightSeg[overlap[1]:]
+                print "overlap:", overlap
+            else:
+                rightSeg =  houseKeeper.reverseComplement(rightSeg)
+                overlap = IORobot.align(leftSeg, rightSeg , folderName, mummerLink)
+                
+                if overlap[1] > 0:
+                    rightpart = rightSeg[overlap[1]:]
+                    print "overlap:", overlap
+                else:
+                    rightpart = ""
+                    print "overlap error ? :", overlap 
             
-            rightpart = rightSeg[overlap[1]:]
         
         #assert(1==2)
         middlepart = contig[begin:end] 
@@ -535,7 +570,7 @@ def alignLR2SC(folderName, mummerLink):
     boundary = 5 
     toMatchThres = 1000 
     gapBtwBk = 10000 
-    gapSingleRd = 2000
+    gapSingleRd = 50000
     
     dataList.sort(key = itemgetter(-1), reverse= True)
     
@@ -581,7 +616,7 @@ def alignLR2SC(folderName, mummerLink):
                     maxRlen, Lseek = matchrdlen, eachmaploc2
             
             if maxLlen > toMatchThres and maxRlen > toMatchThres:
-                if abs(Rseek[1] - Lseek[0]) > gapSingleRd:
+                if abs(Rseek[1] - Lseek[0]) > gapSingleRd or Rseek[-1] !=Lseek[-1]:
                     bkPtList.append([Rseek[-2], Rseek[1]-1, 'R', Rseek[-1] ])
                     bkPtList.append([Lseek[-2], Lseek[0]-1, 'L', Lseek[-1] ])
      
@@ -594,7 +629,7 @@ def alignLR2SC(folderName, mummerLink):
     for key, items in groupby(bkPtList, itemgetter(0)):
         for eachitem in items:
             contigName , locToBreak = eachitem[0], eachitem[1]
-            if isBridgedDic[contigName][locToBreak] == True:
+            if isBridgedDic[contigName][locToBreak] == False:
                 if contigName in breakDic:
                     breakDic[contigName] += [eachitem]
                 else:

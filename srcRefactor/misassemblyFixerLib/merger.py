@@ -779,8 +779,7 @@ def onlyLRMiassemblyFix(folderName, mummerLink):
 
     print "len(contigList)", len(contigList)
     IORobot.writeSegOut(contigList, folderName, "LC_n.fasta")
-
-
+    
 def withinBound(sep, mylist, bkpt ):
     mylist.sort()
     i = bisect.bisect(mylist, bkpt)

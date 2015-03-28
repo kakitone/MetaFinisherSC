@@ -1,5 +1,6 @@
 import merger 
 from ..repeatPhaserLib.finisherSCCoreLib import houseKeeper
+from ..repeatPhaserLib.finisherSCCoreLib import nonRedundantResolver
 
 import time
 import argparse
@@ -59,7 +60,8 @@ elif merger.mergerGlobalLCReads == "LR":
     os.system(command)
     print "Command: ",  command 
     
-    
+    nonRedundantResolver.removeEmbedded(folderName , mummerLink)
+
     
     
     

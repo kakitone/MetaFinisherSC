@@ -60,7 +60,7 @@ elif merger.mergerGlobalLCReads == "LR":
     os.system(command)
     print "Command: ",  command 
     
-    nonRedundantResolver.removeEmbedded(folderName , mummerLink)
+    nonRedundantResolver.removeEmbedded(newFolderName , newMummerLink)
 
     
     

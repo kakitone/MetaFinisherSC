@@ -20,7 +20,7 @@ class IsOddTests(unittest.TestCase):
     def testLC_SR(self):
         print "Testing LC_SR "
         
-        if False:
+        if True:
             self.runningLCSRTestSet("/Users/kakitlam/Desktop/metaFinisherSC/LC_SR/")
         
             matchingContigFile = "LC_n.fasta"
@@ -32,7 +32,7 @@ class IsOddTests(unittest.TestCase):
     
     def testSC_LR(self):
         print "Testing SC_LR "
-        if False:
+        if True:
             self.runningSCLRTestSet("/Users/kakitlam/Desktop/metaFinisherSC/SC_LR/")
         
             matchingContigFile = "SC_n.fasta"
@@ -45,12 +45,13 @@ class IsOddTests(unittest.TestCase):
     def testMerger(self):
         print "Testing SC_LR and LC_SR "
         
-        if False:
+        if True:
             self.runningMergerTestSet()
-        
             matchingContigFile = "contigs.fasta"
             ctexpected = 8
             lenDic = IORobot.obtainLength(self.testingFolder+"/",  matchingContigFile)
+            print lenDic
+            print "len(lenDic)", len(lenDic)
             assert(len(lenDic) == ctexpected)
             
             os.system("rm -rf "+ self.testingFolder)
@@ -59,7 +60,7 @@ class IsOddTests(unittest.TestCase):
     def testIntegrationTestLC_SR(self):
         print "Integration Test LC_SR, FinisherSC and ASplitter"
         # Current focus : 
-        if False:
+        if True:
         
             self.runningLCSRTestSet("/Users/kakitlam/Desktop/metaFinisherSC/LC_SR/")
         
@@ -90,8 +91,8 @@ class IsOddTests(unittest.TestCase):
     def testIntegrationTestSC_LR(self):
         print "Integration Test SC_LR, FinisherSC"    
         
-        if False:
-            self.runningSCLRTestSet("/Users/kakitlam/Desktop/metaFinisherSC/SC_LR/", 4)
+        if True:
+            self.runningSCLRTestSet("/Users/kakitlam/Desktop/metaFinisherSC/SC_LR/")
             
                 
             os.system("cp "+ self.testingFolder + "/SC_n.fasta " + self.testingFolder + \
@@ -120,7 +121,7 @@ class IsOddTests(unittest.TestCase):
         print "Full Integration Test on SC, LC, LR, SR ; " +\
               "using Merger, FinisherSC, ASplitter."
         
-        if False:
+        if True:
             self.runningMergerTestSet()
         
             os.system("cp "+ self.testingFolder + "/LR.fasta " + self.testingFolder + \

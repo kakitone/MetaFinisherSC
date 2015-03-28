@@ -32,11 +32,23 @@ High level interface  :
     
     
 def combineResults(folderName):
+    commandList = []
     command = "cat "+ folderName + "LC_n.fasta "+ folderName + "SC_n.fasta > "
     command = command + folderName + "contigs.fasta"  
     
+    commandList.append(command)
+    
+    command = "perl -pe 's/>[^\$]*$/\">Seg\" . ++$n .\"\n\"/ge' "+folderName+"contigs.fasta > "+folderName+"newContigs.fasta "
+    commandList.append(command)
+    
+    command = "cp " +folderName+"newContigs.fasta  "+folderName+"contigs.fasta "
+    commandList.append(command)
+    
     if True:  
-        os.system(command)
+        for eachcomm in commandList:
+            
+            os.system(eachcomm)
+            
         
 def mergeContigs(folderName, mummerLink):
     print "mergeContigs" 
@@ -514,7 +526,8 @@ from ..repeatPhaserLib.finisherSCCoreLib import IORobot
 '''
 
 def findRedundantSC(folderName, mummerLink):
-    nonRedundantResolver.removeRedundantRefvsQuery(folderName, mummerLink,  "LC_n.fasta" , "SC_n.fasta", "SC_n_tmp")
+    if True:
+        nonRedundantResolver.removeRedundantRefvsQuery(folderName, mummerLink,  "LC_n.fasta" , "SC_n.fasta", "SC_n_tmp")
 
 def removeNeighbor(oldList, gapBtwBk ):
     oldList.sort()
@@ -584,7 +597,7 @@ def alignLR2SC(folderName, mummerLink):
         isBridgedDic[eachitem] = [False for i in range(lenDic[eachitem])]
     
     thres = 30 
-    boundary = 5 
+    boundary = 50 
     toMatchThres = 1000 
     gapBtwBk = 10000 
     gapSingleRd = 50000
@@ -595,6 +608,8 @@ def alignLR2SC(folderName, mummerLink):
     alignerRobot.transformCoor(dataList)
     
     bkPtList = []
+    
+    print "dataList[0:10]", dataList[0:10]
     
     for key, items in groupby(dataList, itemgetter(-1)):
         ck = False
@@ -640,19 +655,22 @@ def alignLR2SC(folderName, mummerLink):
     breakDic = {} 
     bkPtList.sort()
     
+    print "bkPtList", bkPtList
     
     # New version : bkPtList format [[ contigName, contigBkPt, L/R dir to extend, readName]]
     #               and include top and bottom
     for key, items in groupby(bkPtList, itemgetter(0)):
         for eachitem in items:
             contigName , locToBreak = eachitem[0], eachitem[1]
-            if isBridgedDic[contigName][locToBreak] == False:
-                if contigName in breakDic:
-                    breakDic[contigName] += [eachitem]
-                else:
-                    breakDic[contigName] = [eachitem] 
-    
+            #if isBridgedDic[contigName][locToBreak] == False:
+            if contigName in breakDic:
+                breakDic[contigName] += [eachitem]
+            else:
+                breakDic[contigName] = [eachitem] 
+
     ### remove close neighbor and  add top and bottom
+    
+    print "breakDic", breakDic
     
     newBreakDic= {}
     for eachitem in breakDic:

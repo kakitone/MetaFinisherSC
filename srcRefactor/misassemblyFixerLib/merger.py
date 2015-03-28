@@ -203,9 +203,9 @@ def interQuartile_sd(tDiffVec, T):
     
 def findOutliners(tDiffVec, sd, T):
     outLiners = []
-    if merger.mergerGlobalLCReads == "SR":
+    if mergerGlobalLCReads == "SR":
         thresValue = 13*sd
-    elif merger.mergerGlobalLCReads == "LR":
+    elif mergerGlobalLCReads == "LR":
         thresValue = 5*sd
     
     n = len(tDiffVec)
@@ -257,9 +257,9 @@ def filterBreakPts(outLiners, T, covVec, sd):
     modifiedOutliners.insert(m+1, n-1)
    
    
-    if merger.mergerGlobalLCReads == "LR":
+    if mergerGlobalLCReads == "LR":
         return x
-    elif merger.mergerGlobalLCReads == "SR": 
+    elif mergerGlobalLCReads == "SR": 
         return modifiedOutliners  
 
 def fineToneBreakPts(outLiners, T, covVec):
@@ -474,7 +474,7 @@ def breakLC(folderName ):
             contigList = contigList + [LCList[contigIndex]]
             
     
-    if merger.mergerGlobalLCReads == "SR":
+    if mergerGlobalLCReads == "SR":
         IORobot.writeSegOut(contigList, folderName, "LC_n.fasta")
     
     with open(folderName + "modifiedOutliners.json", 'w') as outfile:

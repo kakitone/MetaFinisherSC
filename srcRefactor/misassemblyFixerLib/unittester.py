@@ -167,8 +167,9 @@ class IsOddTests(unittest.TestCase):
             os.system("cp "+ self.sourceFolder + eachitem + " " +self.testingFolder)
         
         houseKeeper.globalParallel = 4
-        #merger.fixLCMisassembly(self.testingFolder+"/", self.mummerPath)
-        os.system("python -m srcRefactor.misassemblyFixerLib.mFixer -par 4 -t LR "+ self.testingFolder + "/ "+ self.mummerPath )
+        merger.fixLCMisassembly(self.testingFolder+"/", self.mummerPath)
+        
+        #os.system("python -m srcRefactor.misassemblyFixerLib.mFixer -par 4 -t LR "+ self.testingFolder + "/ "+ self.mummerPath )
         
     def runningSCLRTestSet(self, myFolderName):
         print "Integration test on Merger:  " + myFolderName

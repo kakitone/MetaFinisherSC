@@ -49,7 +49,7 @@ elif merger.mergerGlobalLCReads == "LR":
     os.system(command)
     print "Command: ",  command 
     
-    merger.fixLCMisassembly(newFolderName , newMummerLink)
+    merger.onlyLRMiassemblyFix(newFolderName, newMummerLink)
     
     command = "cp "+ newFolderName + "LC_n.fasta "+ newFolderName + "contigs.fasta"
     os.system(command)

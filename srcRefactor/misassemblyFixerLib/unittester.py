@@ -20,7 +20,7 @@ class IsOddTests(unittest.TestCase):
     def testLC_SR(self):
         print "Testing LC_SR "
         
-        if True:
+        if False:
             self.runningLCSRTestSet("/Users/kakitlam/Desktop/metaFinisherSC/LC_SR/")
         
             matchingContigFile = "LC_n.fasta"
@@ -28,7 +28,7 @@ class IsOddTests(unittest.TestCase):
             lenDic = IORobot.obtainLength(self.testingFolder +"/",matchingContigFile  )
             assert(len(lenDic) == ctexpected)
         
-        os.system("rm -rf "+ self.testingFolder)
+            os.system("rm -rf "+ self.testingFolder)
     
     def testSC_LR(self):
         print "Testing SC_LR "
@@ -53,7 +53,7 @@ class IsOddTests(unittest.TestCase):
             lenDic = IORobot.obtainLength(self.testingFolder+"/",  matchingContigFile)
             assert(len(lenDic) == ctexpected)
             
-        os.system("rm -rf "+ self.testingFolder)
+            os.system("rm -rf "+ self.testingFolder)
         
     
     def testIntegrationTestLC_SR(self):
@@ -84,7 +84,7 @@ class IsOddTests(unittest.TestCase):
             lenDic = IORobot.obtainLength(self.testingFolder+"/",  matchingContigFile)
             assert(len(lenDic) == ctexpected)
             
-        os.system("rm -rf "+ self.testingFolder)
+            os.system("rm -rf "+ self.testingFolder)
         
         
     def testIntegrationTestSC_LR(self):
@@ -113,7 +113,7 @@ class IsOddTests(unittest.TestCase):
             assert(len(lenDic) == ctexpected)
             
         
-        os.system("rm -rf "+ self.testingFolder)
+            os.system("rm -rf "+ self.testingFolder)
         
             
     def testFullIntegrationTest(self):

@@ -203,6 +203,10 @@ def interQuartile_sd(tDiffVec, T):
     
 def findOutliners(tDiffVec, sd, T):
     outLiners = []
+    if merger.mergerGlobalLCReads == "SR":
+        thresValue = 13*sd
+    elif merger.mergerGlobalLCReads == "LR":
+        thresValue = 5*sd
     
     n = len(tDiffVec)
     deletedList = [False for i in range(n)]
@@ -213,7 +217,7 @@ def findOutliners(tDiffVec, sd, T):
     for eachitem in searchList:
         value, index = eachitem[0] , eachitem[1]
         #print value, index
-        if value < 13*sd :
+        if value < thresValue:
             break
         else:
             if deletedList[index] == True:
@@ -251,8 +255,12 @@ def filterBreakPts(outLiners, T, covVec, sd):
     
     modifiedOutliners.insert(0, 0)
     modifiedOutliners.insert(m+1, n-1)
-            
-    return modifiedOutliners  
+   
+   
+    if merger.mergerGlobalLCReads == "LR":
+        return x
+    elif merger.mergerGlobalLCReads == "SR": 
+        return modifiedOutliners  
 
 def fineToneBreakPts(outLiners, T, covVec):
 ### Deprecated... not really needed
@@ -397,7 +405,7 @@ def breakAcBkPtsTwoSided(contig, modifiedOutlinersOld, folderName, mummerLink):
         
     return contigBreakDown 
 
-def breakLC(folderName):
+def breakLC(folderName ):
     
     '''
     Input : LC.fasta, coveragePerContigs.json
@@ -433,6 +441,8 @@ def breakLC(folderName):
     
     name2Index, index2Name = IORobot.fastaContigNameIndexConversion(folderName, "LC.fasta")
     
+    breakPtsDic = {}
+    
     for contigIndex in range(len(LCList)) : 
         
         name = index2Name[contigIndex]
@@ -456,13 +466,20 @@ def breakLC(folderName):
             
             contigBreakDown = breakAcBkPts(LCList[contigIndex], modifiedOutliners)
             
+            breakPtsDic[name] = modifiedOutliners
+            
             contigList = contigList + contigBreakDown
-            #assert(1==2)
+
         else:
             contigList = contigList + [LCList[contigIndex]]
             
     
-    IORobot.writeSegOut(contigList, folderName, "LC_n.fasta")
+    if merger.mergerGlobalLCReads == "SR":
+        IORobot.writeSegOut(contigList, folderName, "LC_n.fasta")
+    
+    with open(folderName + "modifiedOutliners.json", 'w') as outfile:
+        json.dump(breakPtsDic, outfile)
+    
     
 
 def fixLCMisassembly(folderName, mummerLink):
@@ -694,5 +711,107 @@ def fixSCMisassembly(folderName , mummerLink):
     findRedundantSC(folderName, mummerLink)
     
         
+'''
+Only Long reads and long contigs case:
+'''
+
+def onlyLRMiassemblyFix(folderName, mummerLink):
+    if True:
+        alignSR2LC(folderName, mummerLink)
+        
+    breakLC(folderName)
+    
+    if True:
+        alignerRobot.useMummerAlignBatch(mummerLink, folderName, [["selfLC", "LC.fasta", "LC.fasta", ""]], houseKeeper.globalParallel )
+        
+    dataList = alignerRobot.extractMumData(folderName, "selfLCOut")
+    dataList = alignerRobot.transformCoor(dataList)
+    lenDic = IORobot.obtainLength(folderName, 'LC.fasta')
+    matchThres = 10000
+    nonMatchThres = 500
+    count = 0
+
+    newDataList= []
+    for eachitem in dataList:
+        name1, name2 = eachitem[-2], eachitem[-1]
+        matchLen1 , matchLen2 = eachitem[4], eachitem[5]
+        start1 , end1, start2, end2 = eachitem[0], eachitem[1], eachitem[2], eachitem[3]
+
+        if name1!= name2 and ( min(lenDic[name1] - end1, lenDic[name2] - end2 ) > nonMatchThres \
+        or min(start1, start2) > nonMatchThres ) \
+        and matchLen1> matchThres:
+            print "eachitem ", eachitem, lenDic[name1], lenDic[name2]
+            count = count + 1
+            newDataList.append(eachitem)
+
+    print "Count: " + str(count)
+
+    blkDic = getBreakPointFromDataList(folderName, newDataList)
+
+    LCList = IORobot.loadContigsFromFile(folderName, "LC.fasta")
+
+    contigList = []
+
+    for eachcontig in LCList:
+
+        if not eachcontig in blkDic:
+            contigList = contigList + [ LCList[eachcontig] ]
+        else:
+            contigList = contigList + breakAcBkPts(LCList[eachcontig], blkDic[eachcontig])
+
+    print "len(contigList)", len(contigList)
+    IORobot.writeSegOut(contigList, folderName, "LC_n.fasta")
+
+
+def withinBound(sep, mylist, bkpt ):
+    mylist.sort()
+    i = bisect.bisect(mylist, bkpt)
+    ck = False
+
+    if i>0 and abs(bkpt-mylist[i-1])< sep:
+        ck = True
+
+    if i < len(mylist) and abs(bkpt - mylist[i]) <sep :
+        ck = True
+
+    return ck
+
+
+def getBreakPointFromDataList(folderName, dataList):
+    g = 1000
+    blkDic = {}
+    dataList.sort(key = itemgetter(-2))
+    lenDic = IORobot.obtainLength(folderName, "LC.fasta")
+
+    json_data = open(folderName + "modifiedOutliners.json", 'r')
+    breakPtsDic = json.load(json_data)
+    sep = 5000
+
+    for key, items in groupby(dataList,itemgetter(-2) ):
+        contigName = key
+        newList =[]
+        for eachitem in items:
+            newList.append([eachitem[0], eachitem[1]])
+        newList.sort()
+
+        bktmp = [0]
+
+        if newList[0][0] > g :
+            if withinBound(sep, breakPtsDic[contigName],newList[0][0]):
+                bktmp.append(newList[0][0])
+
+        for i in range(len(newList)-1):
+            if newList[i+1][0] > newList[i][1] + g:
+                if withinBound(sep, breakPtsDic[contigName],newList[i+1][0]):
+                    bktmp.append(newList[i+1][0])
+
+        bktmp.append(lenDic[contigName])
+
+        blkDic[contigName] = bktmp
+        print "contigName: "+ contigName
+        print "bktmp:", bktmp
+        print "breakPtsDic[contigName]",breakPtsDic[contigName]
+
+    return blkDic
 
 

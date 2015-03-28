@@ -29,17 +29,17 @@ The final output is **abun.fasta** after running through the M-Fixer(mis-assembl
 
 In order to do that, here are the steps. 
 
-1. Run M-Fixer which merge contigs with information from reads. It also fixes misassembly
+1. Run M-Fixer which merge contigs with information from reads(key intermediate output here is noEmbed.fasta). It also fixes misassembly
 
         python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 -t LR destinedFolder mummerPath 
 
 
-2. Run FinisherSC to join the contigs together based on overlap information
+2. Run FinisherSC to join the contigs together based on overlap information(key intermediate output here is improved2.fasta)
 
         python -m srcRefactor.repeatPhaserLib.finisherSCCoreLib.finisherSC -par 20 destinedFolder mummerPath
 
 
-3. Run A-Splitter to join contigs based on abundance information (to run faster, you can use the -ar True -rs 0 -rd True )
+3. Run A-Splitter to join contigs based on abundance information (to run faster, you can use the -ar True -rs 0 -rd True ) (key intermediate output here is abun.fasta)
 
         python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 -rp improved2.fasta destinedFolder mummerPath
 

@@ -488,7 +488,14 @@ def obtainLinkInfoReadContig(dummyI, mummerLink, folderName,thres, lengthDic, K)
 
 
 
-def writeSegOut(ctgList, folderName, fileout):
+def writeSegOut(oldCtgList, folderName, fileout):
+    ctgList = []
+    thres = 10 
+    
+    for eachitem in oldCtgList:
+        if len(eachitem) >= thres:
+            ctgList.append(eachitem)
+            
     f = open(folderName + fileout, 'w')
     
     for i in range(len(ctgList)):

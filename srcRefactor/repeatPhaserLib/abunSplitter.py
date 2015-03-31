@@ -84,7 +84,7 @@ def determindMatch(inList, outList, myCountDic, folderName,contigReadGraph, N1):
         found = satisfyMatch(eachitem ,newOutList, sd)
         
         if found != -1 :
-            leftCtgIndex, rightCtgIndex = eachitem[0], found[0] 
+            leftCtgIndex, rightCtgIndex = eachitem[0], found
             succReadsList = abunGraphLib.findPathBtwEnds(folderName, leftCtgIndex, rightCtgIndex, contigReadGraph, N1)
             
             if succReadsList != None:

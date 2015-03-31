@@ -67,7 +67,7 @@ def satisfyMatch(initem ,newOutList, sd):
         
     return found
      
-def determindMatch(inList, outList, myCountDic):
+def determindMatch(inList, outList, myCountDic, folderName,contigReadGraph, N1):
     resolvedList = []
     newInList , newOutList = [], []
     
@@ -82,10 +82,14 @@ def determindMatch(inList, outList, myCountDic):
     
     for eachitem in newInList:
         found = satisfyMatch(eachitem ,newOutList, sd)
-        if found != -1 :
-            resolvedList.append([eachitem[0], found])
         
+        if found != -1 :
+            leftCtgIndex, rightCtgIndex = eachitem, found 
+            succReadsList = abunGraphLib.findPathBtwEnds(folderName, leftCtgIndex, rightCtgIndex, contigReadGraph, N1)
             
+            if succReadsList != None:
+                resolvedList.append([eachitem[0], found])
+    
     return resolvedList
 
 def addEdges(G, resolvedList):
@@ -194,7 +198,7 @@ def abunSplit(folderName, mummerLink, myCountDic,contigReadGraph,  contigFilenam
     
     for eachitem in repeatPairs:
         inList, outList = eachitem[0], eachitem[1]
-        resolvedList = determindMatch(inList, outList, myCountDic)
+        resolvedList = determindMatch(inList, outList, myCountDic, folderName,contigReadGraph, N1)
         print "resolvedList", resolvedList
         gapContentLookUpList += generateGapContentLookup(folderName, mummerLink, resolvedList, contigReadGraph, contigFilename,readsetFilename)
         

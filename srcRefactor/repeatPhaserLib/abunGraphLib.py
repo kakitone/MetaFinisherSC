@@ -464,15 +464,19 @@ def findPathBtwEnds(folderName, leftCtgIndex, rightCtgIndex, contigReadGraph, N1
     x, startIndex, endIndex, mypath = leftCtgIndex,leftCtgIndex ,rightCtgIndex, []
     returnPath = DFS(G, x, N1, startIndex, endIndex, mypath)
     
-    if returnPath[0] == startIndex:
-        returnPath.pop(0)
-    
-    if returnPath[-1] == endIndex:
-        returnPath.pop(-1)
-    
-    readList = returnPath 
-    
-    return readList 
+    if returnPath == None:
+        return None
+    else:
+
+        if returnPath[0] == startIndex:
+            returnPath.pop(0)
+        
+        if returnPath[-1] == endIndex:
+            returnPath.pop(-1)
+        
+        readList = returnPath 
+        
+        return readList 
 
 
 

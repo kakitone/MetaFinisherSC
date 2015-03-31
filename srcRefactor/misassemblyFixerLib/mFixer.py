@@ -43,6 +43,9 @@ for eachitem in fileList:
 
 if merger.mergerGlobalLCReads == "SR":
     merger.mergeContigs(newFolderName , newMummerLink)
+    command = "cp "+ newFolderName + "LR.fasta "+ newFolderName + "raw_reads.fasta"
+    os.system(command)
+    print "Command: ",  command 
     
 elif merger.mergerGlobalLCReads == "LR":
     

@@ -8,6 +8,7 @@ from itertools import groupby
 from finisherSCCoreLib import IORobot
 from finisherSCCoreLib import alignerRobot
 from finisherSCCoreLib import houseKeeper
+from finisherSCCoreLib import gapFiller
 
 import abunHouseKeeper
 
@@ -55,6 +56,9 @@ def getAllAssociatedReads(folderName, mummerLink,forFastaName):
     '''
     
     header, referenceFile, queryFile = "seedReads", forFastaName + ".fasta" , "raw_reads.fasta"
+    
+    gapFiller.formRelatedReadsFile(folderName, mummerLink, "improved3")
+    
     command = "cp " + folderName + "relatedReads.fasta " + folderName + referenceFile
     os.system(command)
     

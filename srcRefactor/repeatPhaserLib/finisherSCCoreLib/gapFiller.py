@@ -15,7 +15,7 @@ def fillGap(folderName , mummerLink):
     # ## add it the functionality of checking filtered list V 
     # ## testing 
     
-    formRelatedReadsFile(folderName, mummerLink)
+    formRelatedReadsFile(folderName, mummerLink, "improved")
     os.system("cp raw_reads.part* "+ folderName)
     os.system("rm raw_reads.part*")
     
@@ -46,7 +46,7 @@ def loadOpenList(folderName):
     print "usableJunction", usableJunction
     return usableJunction
 
-def formRelatedReadsFile(folderName, mummerLink):    
+def formRelatedReadsFile(folderName, mummerLink, inputFileName):    
     # Find associated read and extract into a file associatedReads.fasta
     # Input: contigs.fasta, cleaned_Reads.fasta 
     # Output: relatedReads.fasta
@@ -54,8 +54,8 @@ def formRelatedReadsFile(folderName, mummerLink):
     # ## Extract heads of the contigs
     print ">formRelatedReadsFile"
     
-    f = open(folderName + "improved.fasta", 'r')
-    f2 = open(folderName + "improvedTrunc.fasta", 'w')
+    f = open(folderName + inputFileName +".fasta", 'r')
+    f2 = open(folderName + inputFileName + "Trunc.fasta", 'w')
     temp = f.readline()
     tempContig = ""
     thres = 400
@@ -106,7 +106,7 @@ def formRelatedReadsFile(folderName, mummerLink):
     f.close()
     
     # ## Write double stranded reads
-    IORobot.writeToFile_Double1(folderName, "improved.fasta", "improved_Double.fasta", "contig")
+    IORobot.writeToFile_Double1(folderName, inputFileName+".fasta", inputFileName+"_Double.fasta", "contig")
     # writeToFile_Double1(folderName, "raw_reads.fasta", "raw_reads_Double.fasta","read")
     
     # ## Apply MUMMER on them using cleanedReads against them
@@ -130,7 +130,7 @@ def formRelatedReadsFile(folderName, mummerLink):
         else:
             indexOfMum = str(dummyI)
             
-        outputName, referenceName, queryName, specialName=  "outGapFillRaw"+indexOfMum , "improvedTrunc.fasta", "raw_reads.part-" + indexOfMum + ".fasta", "fromMum" + indexOfMum 
+        outputName, referenceName, queryName, specialName=  "outGapFillRaw"+indexOfMum , inputFileName+"Trunc.fasta", "raw_reads.part-" + indexOfMum + ".fasta", "fromMum" + indexOfMum 
         workerList.append([outputName, referenceName, queryName, specialName])
     
     

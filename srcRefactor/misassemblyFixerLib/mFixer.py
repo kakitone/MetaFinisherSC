@@ -5,6 +5,7 @@ from ..repeatPhaserLib.finisherSCCoreLib import nonRedundantResolver
 import time
 import argparse
 import os
+import json
 
 t0 = time.time()
 
@@ -13,20 +14,19 @@ parser.add_argument('folderName')
 parser.add_argument('mummerLink')
 parser.add_argument('-par', '--parallel', help= 'Fast aligns contigs (input is maximum number of threads)', required=False)
 parser.add_argument('-t', '--LCReads', help= 'Type of reads aligned to the contigs formed by long reads', required=False)
-
-
+parser.add_argument('-op', '--option', help= 'Parameters to pass in', required=False)
+parser.add_argument('-cl', '--cleanInput', help= 'Parameters to clean inputs', required=False)
 
 args = vars(parser.parse_args())
-
 
 if args['parallel'] != None:
     houseKeeper.globalParallel = int(args['parallel'])
 else:
-    houseKeeper.globalParallel = 1
+    houseKeeper.globalParallel = 20
 
 
 if args['LCReads'] == None:
-    merger.mergerGlobalLCReads = "SR"
+    merger.mergerGlobalLCReads = "LR"
 elif args['LCReads'] == "LR":
     merger.mergerGlobalLCReads = "LR"
 elif args['LCReads'] == "SR":
@@ -34,42 +34,36 @@ elif args['LCReads'] == "SR":
 
 pathExists, newFolderName, newMummerLink = houseKeeper.checkingPath(args['folderName'] , args['mummerLink'], False)
 
-fileList = ["SC.fasta", "LC.fasta", "SR.fasta", "LR.fasta"]
+if args['cleanInput'] == "True":
+    fileList = ["SC.fasta", "LC.fasta", "SR.fasta", "LR.fasta"]
 
-for eachitem in fileList:
-        os.system("sed -e 's/|//g' " + newFolderName + eachitem+"  > " + newFolderName + "tmp.fasta")
-        os.system("cp " + newFolderName + "tmp.fasta " + newFolderName + eachitem )
+    for eachitem in fileList:
+            os.system("sed -e 's/|//g' " + newFolderName + eachitem+"  > " + newFolderName + "tmp.fasta")
+            os.system("cp " + newFolderName + "tmp.fasta " + newFolderName + eachitem )
 
 
-if merger.mergerGlobalLCReads == "SR":
-    merger.mergeContigs(newFolderName , newMummerLink)
-    command = "cp "+ newFolderName + "LR.fasta "+ newFolderName + "raw_reads.fasta"
-    os.system(command)
-    print "Command: ",  command 
-    
-elif merger.mergerGlobalLCReads == "LR":
-    
-    command = "cp "+ newFolderName + "LR.fasta " + newFolderName + "SR.fasta "
-    os.system(command)
-    print "Command: ",  command 
-    
-    merger.onlyLRMiassemblyFix(newFolderName, newMummerLink)
-    
-    command = "cp "+ newFolderName + "LC_n.fasta "+ newFolderName + "contigs.fasta"
-    os.system(command)
-    print "Command: ",  command 
-    
-    command = "cp "+ newFolderName + "LR.fasta "+ newFolderName + "raw_reads.fasta"
-    os.system(command)
-    print "Command: ",  command 
-    
-    nonRedundantResolver.removeEmbedded(newFolderName , newMummerLink)
+if args['option'] != None:
+    settingDataCombo = args['option'].split()
+    settingDic = {}
 
-    
-    
-    
-    
-    
+    for eachitem in settingDataCombo:
+        tmp = eachitem.split('=')
+        settingDic[tmp[0]] = tmp[1]
+
+    canLoad = merger.mergerGlobalFixerRobot.loadData(settingDic)
+    if canLoad:
+        settingDic = merger.mergerGlobalFixerRobot.__dict__
+        with open(newFolderName + "optionMFixer.json", 'w') as f:
+            json.dump(settingDic, f)
+else:
+    canLoad = True    
+
+if canLoad == True:
+    merger.mainFlow(newFolderName, newMummerLink)
+else: 
+    print "Sorry. The above folders or files are missing or options are not correct. If you continue to have problems, please contact me(Ka-Kit Lam) at kklam@eecs.berkeley.edu"
+
+
     
 print  "Time", time.time() - t0
 

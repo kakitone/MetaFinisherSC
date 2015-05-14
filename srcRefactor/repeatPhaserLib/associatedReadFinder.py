@@ -15,7 +15,7 @@ import abunHouseKeeper
 
 def checkSatisfy(eachitem, lenDic):
     # "Format of the dataList :  1      765  |    11596    10822  |      765      775  |    84.25  | ref_NC_001133_       scf7180000000702"
-    threshold = 40
+    threshold = 50
      
     seedName = eachitem[-1]
     detectedName = eachitem[-2]

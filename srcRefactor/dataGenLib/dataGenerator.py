@@ -254,7 +254,7 @@ class abunGap_example(dataGeneartorRobot):
             
         segList = dataGenLib.contigBreakDown(genList, breakPoints)
         
-        seqListNew = [segList[0] , segList[1][self.repeatLen:], segList[2], segList[3][self.repeatLen:] ]
+        seqListNew = [segList[0] + segList[3], segList[2]+ segList[1] ]
     
     
         for eachitem in seqListNew:
@@ -265,11 +265,11 @@ class abunGap_example(dataGeneartorRobot):
         
     def setParameters(self):
         self.G= 5*(10**6)
-        self.L = 3000
+        self.L = 6000
         self.p = 0.01
         self.m = 2
         self.abun = [50, 20]
-        self.repeatLen = 5000
+        self.repeatLen = 12000
         
 
 

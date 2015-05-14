@@ -5,25 +5,98 @@ import houseKeeper
 
 # ## 0) Preprocess by removing embedded contigs (I: contigs.fasta ; O : noEmbed.fasta)
 
+### Disjoint Union Data Structure
+class clusterElem(object):
+    def __init__(self,index):
+        self.rank = 0
+        self.parent = self
+        self.id = index
+        self.childList =[]
+        
+        #self.size = 1
+
+def find(x):
+    #if x != x.parent:
+    #    x.parent = find(x.parent)
+    #return x.parent
+    if x.parent == x:
+        return x
+    else:
+        return find(x.parent)
+       
+def union(x,y):
+    xRoot = find(x)
+    yRoot = find(y)
+    
+    if xRoot == yRoot:
+        return 0
+    
+    if xRoot.rank < yRoot.rank:
+        xRoot.parent = yRoot
+        yRoot.childList.append(xRoot)
+        
+        
+    elif xRoot.rank > yRoot.rank:
+        yRoot.parent = xRoot
+        xRoot.childList.append(yRoot)
+        
+        
+    else:
+        yRoot.parent = xRoot
+        xRoot.childList.append(yRoot)
+        
+        xRoot.rank = xRoot.rank + 1 
+        
+    return 1
+
+def familyList(x):
+    root = find(x)
+    stack = []
+    familyKmers = [root]
+    
+    stack.append(root)
+    while (len(stack) >0 ):
+        item = stack.pop(0)
+        for eachsubitem in item.childList:
+            familyKmers.append(eachsubitem)
+            stack.append(eachsubitem)
+            
+    return familyKmers
+                    
+
+
+
+
 def removeEmbedded(folderName , mummerLink):
     print "removeEmbedded"
-    thres = 10
-    os.system("sed -e 's/|//g' " + folderName + "contigs.fasta  > " + folderName + "contigs2.fasta")
+    removeRedundantWithFile(folderName , mummerLink, "contigs", "self", "noEmbed")
 
-    os.system("cp " + folderName + "contigs2.fasta " + folderName + "contigs.fasta") 
+
+def removeRedundantWithFile(folderName , mummerLink, inputFilename, mummerTmpName, outputFileName):
+    thres = 10
+    os.system("sed -e 's/|//g' " + folderName + inputFilename+".fasta  > " + folderName + inputFilename+ "2.fasta")
+
+    os.system("cp " + folderName + inputFilename+"2.fasta " + folderName + inputFilename+".fasta") 
 
     if True:
-        alignerRobot.useMummerAlignBatch(mummerLink, folderName, [["self", "contigs.fasta", "contigs.fasta", ""]], houseKeeper.globalParallel )
+        alignerRobot.useMummerAlignBatch(mummerLink, folderName, [[mummerTmpName, inputFilename+".fasta", inputFilename+".fasta", ""]], houseKeeper.globalParallel )
         # alignerRobot.useMummerAlign(mummerLink, folderName, "self", "contigs.fasta", "contigs.fasta")
         # outputName, referenceName, queryName, specialName
     
-    dataList = alignerRobot.extractMumData(folderName, "selfOut")
+    dataList = alignerRobot.extractMumData(folderName, mummerTmpName+ "Out")
     
     dataList = alignerRobot.transformCoor(dataList)
     
-    lenDic = IORobot.obtainLength(folderName, 'contigs.fasta')
+    lenDic = IORobot.obtainLength(folderName, inputFilename+'.fasta')
     
     removeList = []
+
+    shortEmbedClusterDic = {}
+
+    for eachitem in lenDic:
+        shortEmbedClusterDic[eachitem]= clusterElem(eachitem)
+
+
     for eachitem in dataList:
         match1, match2, name1, name2 = eachitem[4], eachitem[5], eachitem[7], eachitem[8]
         
@@ -36,10 +109,20 @@ def removeEmbedded(folderName , mummerLink):
                 removeList.append(name2)
             elif abs(l1 - match1) < thres and abs(l2 - match2) < thres:
                 print "Both shortembedd", eachitem
-                
+                union(shortEmbedClusterDic[name1], shortEmbedClusterDic[name2])
+
+        
     nameList = obtainComplement(lenDic, removeList)
     
-    IORobot.putListToFileO(folderName, "contigs.fasta", "noEmbed", nameList)
+    returnList = []
+
+    for eachitem in nameList:
+        if find(shortEmbedClusterDic[eachitem]).id == eachitem:
+            returnList.append(eachitem)
+
+    print "len(nameList), len(returnList)", len(nameList), len(returnList)
+
+    IORobot.putListToFileO(folderName, inputFilename+".fasta", outputFileName, returnList)
 
 
 def obtainComplement(lenDic, removeList):
@@ -76,7 +159,7 @@ def removeRedundantRefvsQuery(folderName, mummerLink,  fileR , fileQ, outputFile
             isRedundantList.append(name2)
     
     #print lenDicQ
-    
+
     nonRedundantList = obtainComplement(lenDicQ, isRedundantList)
     
     print nonRedundantList

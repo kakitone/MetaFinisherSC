@@ -3,9 +3,36 @@ from ..repeatPhaserLib.finisherSCCoreLib import alignerRobot
 from ..repeatPhaserLib.finisherSCCoreLib import nonRedundantResolver
 from ..repeatPhaserLib.finisherSCCoreLib import houseKeeper 
 import bisect
-
+import adaptorFix
 
 mergerGlobalLCReads = "SR"
+
+class fixerRobot:
+    def __init__(self):
+        print "fixerRobot"
+        self.toRunAdaptor = True
+        self.toRunNoEmbedEnd = True
+        self.toRunAggressive = False
+        self.sdMult = 5
+        self.tuneParaOnly = False
+
+
+    def loadData(self, initial_data):
+        canLoad = True
+        for key in initial_data:
+            if hasattr(self, key):
+                if initial_data[key] =='True' :
+                    setattr(self, key, True)
+                elif initial_data[key] == 'False':
+                    setattr(self, key, False)
+                else:
+                    setattr(self, key, float(initial_data[key]))
+            else:
+                canLoad = False
+        return canLoad
+
+
+mergerGlobalFixerRobot = fixerRobot()
 
 
 import os 
@@ -50,10 +77,10 @@ def combineResults(folderName):
             os.system(eachcomm)
             
         
-def mergeContigs(folderName, mummerLink):
+def mergeContigs(folderName, mummerLink, inputLCname):
     print "mergeContigs" 
     
-    fixLCMisassembly(folderName, mummerLink)
+    fixLCMisassembly(folderName, mummerLink, inputLCname)
     fixSCMisassembly(folderName, mummerLink)
     
     combineResults(folderName)
@@ -120,7 +147,7 @@ def assignCoverage(dataitem, coveragePerContigsDic):
     
     
 
-def alignSR2LC(folderName, mummerLink):
+def alignSR2LC(folderName, mummerLink, incontigName):
     print "alignSR2LC"
     '''
     Input : SR.fasta, LC.fasta 
@@ -137,20 +164,20 @@ def alignSR2LC(folderName, mummerLink):
     Rmk: Beaware of double stranded DNA
         
     '''
-    LCLenDic = IORobot.obtainLength(folderName, "LC.fasta")
+    LCLenDic = IORobot.obtainLength(folderName, incontigName+".fasta")
     coveragePerContigsDic = {}
     for eachitem in LCLenDic : 
         coveragePerContigsDic[eachitem] = [ 0 for i in range(LCLenDic[eachitem]) ]
     
     random.seed(0)
-    outputName, referenceName, queryName = "SR2LCAlign" , "LC", "SR" 
+    outputName, referenceName, queryName = "SR2"+incontigName+"Align" , incontigName, "SR" 
     
     if True:
         dataList = alignerRobot.largeRvsQAlign(folderName, 20, mummerLink, referenceName, queryName, outputName)
 
     
     dataList.sort(key = itemgetter(-1))
-    LCLenDic = IORobot.obtainLength(folderName, "LC.fasta")
+    LCLenDic = IORobot.obtainLength(folderName, incontigName+ ".fasta")
     SRLenDic = IORobot.obtainLength(folderName, "SR.fasta")
     
     
@@ -218,7 +245,7 @@ def findOutliners(tDiffVec, sd, T):
     if mergerGlobalLCReads == "SR":
         thresValue = 13*sd
     elif mergerGlobalLCReads == "LR":
-        thresValue = 5*sd
+        thresValue = mergerGlobalFixerRobot.sdMult*sd
     
     n = len(tDiffVec)
     deletedList = [False for i in range(n)]
@@ -417,7 +444,7 @@ def breakAcBkPtsTwoSided(contig, modifiedOutlinersOld, folderName, mummerLink):
         
     return contigBreakDown 
 
-def breakLC(folderName ):
+def breakLC(folderName, inputName ):
     
     '''
     Input : LC.fasta, coveragePerContigs.json
@@ -448,10 +475,10 @@ def breakLC(folderName ):
     json_data = open(folderName + "coveragePerContigs.json", 'r')
     coveragePerContigs = json.load(json_data)
     
-    LCList = IORobot.readContigsFromFile(folderName, "LC.fasta")
-    lenDic = IORobot.obtainLength(folderName, "LC.fasta")
+    LCList = IORobot.readContigsFromFile(folderName, inputName+".fasta")
+    lenDic = IORobot.obtainLength(folderName, inputName+".fasta")
     
-    name2Index, index2Name = IORobot.fastaContigNameIndexConversion(folderName, "LC.fasta")
+    name2Index, index2Name = IORobot.fastaContigNameIndexConversion(folderName, inputName+".fasta")
     
     breakPtsDic = {}
     
@@ -494,13 +521,13 @@ def breakLC(folderName ):
     
     
 
-def fixLCMisassembly(folderName, mummerLink):
+def fixLCMisassembly(folderName, mummerLink, inputName):
     print "fixLCMisassembly"
     # Remark : if done, one can also try on LR only data set to see if there 
     # is any reduction on mis-assembly. 
     if True:
-        alignSR2LC(folderName, mummerLink)
-    breakLC(folderName)
+        alignSR2LC(folderName, mummerLink,inputName )
+    breakLC(folderName, inputName)
         
 '''
         
@@ -733,18 +760,15 @@ def fixSCMisassembly(folderName , mummerLink):
 Only Long reads and long contigs case:
 '''
 
-def onlyLRMiassemblyFix(folderName, mummerLink):
-    if True:
-        alignSR2LC(folderName, mummerLink)
-        
-    breakLC(folderName)
+def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
+
     
-    if True:
-        alignerRobot.useMummerAlignBatch(mummerLink, folderName, [["selfLC", "LC.fasta", "LC.fasta", ""]], houseKeeper.globalParallel )
+    if not mergerGlobalFixerRobot.tuneParaOnly:
+        alignerRobot.useMummerAlignBatch(mummerLink, folderName, [["self"+inputName, inputName+".fasta", inputName+".fasta", ""]], houseKeeper.globalParallel )
         
-    dataList = alignerRobot.extractMumData(folderName, "selfLCOut")
+    dataList = alignerRobot.extractMumData(folderName, "self"+inputName+"Out")
     dataList = alignerRobot.transformCoor(dataList)
-    lenDic = IORobot.obtainLength(folderName, 'LC.fasta')
+    lenDic = IORobot.obtainLength(folderName, inputName+'.fasta')
     matchThres = 10000
     nonMatchThres = 500
     count = 0
@@ -755,18 +779,24 @@ def onlyLRMiassemblyFix(folderName, mummerLink):
         matchLen1 , matchLen2 = eachitem[4], eachitem[5]
         start1 , end1, start2, end2 = eachitem[0], eachitem[1], eachitem[2], eachitem[3]
 
-        if name1!= name2 and ( min(lenDic[name1] - end1, lenDic[name2] - end2 ) > nonMatchThres \
-        or min(start1, start2) > nonMatchThres ) \
-        and matchLen1> matchThres:
+        # if name1!= name2  and matchLen1> matchThres:
+        if name1!= name2   and  ( min(lenDic[name1] - end1, lenDic[name2] - end2 ) > nonMatchThres or min(start1, start2) > nonMatchThres ) and matchLen1> matchThres:
             print "eachitem ", eachitem, lenDic[name1], lenDic[name2]
             count = count + 1
             newDataList.append(eachitem)
 
     print "Count: " + str(count)
 
-    blkDic = getBreakPointFromDataList(folderName, newDataList)
+    if mergerGlobalFixerRobot.toRunAggressive == False:
+        if not mergerGlobalFixerRobot.tuneParaOnly:
+            alignSR2LC(folderName, mummerLink, inputName)
+        breakLC(folderName, inputName)
+        blkDic = getBreakPointFromDataList(folderName, newDataList, inputName)
+    else:
+        blkDic = breakPtGettingHack2(folderName, newDataList, inputName)
 
-    LCList = IORobot.loadContigsFromFile(folderName, "LC.fasta")
+
+    LCList = IORobot.loadContigsFromFile(folderName, inputName+".fasta")
 
     contigList = []
 
@@ -794,11 +824,11 @@ def withinBound(sep, mylist, bkpt ):
     return ck
 
 
-def getBreakPointFromDataList(folderName, dataList):
+def getBreakPointFromDataList(folderName, dataList, inputLCname):
     g = 1000
     blkDic = {}
     dataList.sort(key = itemgetter(-2))
-    lenDic = IORobot.obtainLength(folderName, "LC.fasta")
+    lenDic = IORobot.obtainLength(folderName, inputLCname+ ".fasta")
 
     json_data = open(folderName + "modifiedOutliners.json", 'r')
     breakPtsDic = json.load(json_data)
@@ -830,5 +860,120 @@ def getBreakPointFromDataList(folderName, dataList):
         print "breakPtsDic[contigName]",breakPtsDic[contigName]
 
     return blkDic
+
+def breakPtGettingHack(folderName, dataList, inputLCname):
+    
+    blkDic = {}
+    dataList.sort(key = itemgetter(-2))
+    lenDic = IORobot.obtainLength(folderName, inputLCname+".fasta") 
+    g = 1000
+
+    for key, items in groupby(dataList,itemgetter(-2) ):
+        contigName = key
+        newList =[]
+
+        for eachitem in items:
+            newList.append([eachitem[0], eachitem[1]])
+
+        newList.sort()
+
+        bktmp = [0]
+
+        if newList[0][0] > g :
+            bktmp.append(newList[0][0])
+
+        for i in range(len(newList)-1):
+            if newList[i+1][0] > newList[i][1] + g:
+                bktmp.append(newList[i+1][0])
+
+        bktmp.append(lenDic[contigName])
+
+        blkDic[contigName] = bktmp
+        print "contigName: "+ contigName
+        print "bktmp:", bktmp
+        #print "breakPtsDic[contigName]",breakPtsDic[contigName]
+
+    return blkDic
+
+
+def breakPtGettingHack2(folderName, dataList, inputLCname):
+    
+    blkDic = {}
+    dataList.sort(key = itemgetter(-2))
+    lenDic = IORobot.obtainLength(folderName, inputLCname+".fasta") 
+    g = 1000
+
+    for key, items in groupby(dataList,itemgetter(-2) ):
+        contigName = key
+        newList =[]
+
+        for eachitem in items:
+            newList.append([eachitem[0], eachitem[1]])
+            
+        newList.sort()
+        
+        bktmp = [0]
+
+        if newList[0][0] > g :
+            bktmp.append(newList[0][0])
+            bktmp.append(newList[0][1])
+
+        minThres = newList[0][1] + g
+
+        for i in range(len(newList)-1):
+            if newList[i+1][0] > minThres:
+                bktmp.append(newList[i+1][0])
+                bktmp.append(newList[i+1][1])
+
+            if newList[i+1][1] + g > minThres: 
+                minThres = newList[i+1][1] + g
+
+        bktmp.append(lenDic[contigName])
+
+        blkDic[contigName] = bktmp
+        print "contigName: "+ contigName
+        print "bktmp:", bktmp
+        #print "breakPtsDic[contigName]",breakPtsDic[contigName]
+
+    return blkDic
+
+
+def mainFlow(newFolderName, newMummerLink):
+
+    filterName = "LC_filtered"
+    finalOutName = "mFixed"
+
+    if not mergerGlobalFixerRobot.tuneParaOnly: 
+        if mergerGlobalFixerRobot.toRunAdaptor == True:
+            adaptorFix.fixAdaptorSkip(newFolderName, newMummerLink, "LC.fasta", filterName) 
+        else:
+            os.system("cp "+ newFolderName + "LC.fasta "+newFolderName+filterName+".fasta")
+
+
+    if mergerGlobalLCReads == "SR":
+        mergeContigs(newFolderName , newMummerLink, filterName)
+        command = "cp "+ newFolderName + "LR.fasta "+ newFolderName + "raw_reads.fasta"
+        os.system(command)
+        print "Command: ",  command 
+        
+    elif mergerGlobalLCReads == "LR":
+        
+        command = "cp "+ newFolderName + "LR.fasta " + newFolderName + "SR.fasta "
+        os.system(command)
+        print "Command: ",  command 
+        
+        onlyLRMiassemblyFix(newFolderName, newMummerLink, filterName)
+        
+        command = "cp "+ newFolderName + "LC_n.fasta "+ newFolderName + "contigs.fasta"
+        os.system(command)
+        print "Command: ",  command 
+
+        command = "cp "+ newFolderName + "LR.fasta "+ newFolderName + "raw_reads.fasta"
+        os.system(command)
+        print "Command: ",  command 
+        
+
+    nonRedundantResolver.removeRedundantWithFile(newFolderName , newMummerLink, "contigs", "mFixingFinalRedundantRemove", finalOutName)
+
 
 

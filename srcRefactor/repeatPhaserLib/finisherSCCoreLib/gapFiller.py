@@ -119,6 +119,7 @@ def formRelatedReadsFile(folderName, mummerLink, inputFileName):
         bindir = os.path.abspath(os.path.dirname(sys.argv[0]))
         command = bindir + "/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + folderName + "raw_reads.fasta"
         os.system(command)
+        os.system("cp raw_reads.part* "+ folderName)
     
     
     workerList = []

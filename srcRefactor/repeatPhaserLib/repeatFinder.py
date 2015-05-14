@@ -44,6 +44,15 @@ def identifyRepeat(folderName, mummerLink, contigFilename, contigReadGraph, repe
     elif optionToRun == "xphase": 
         newAdjacencyList = abunGraphLib.filterEdge(adjacencyList, folderName, contigFilename)
     
+
+    # cut here
+
+    adjListToRepeatList(newAdjacencyList,folderName,repeatFilename )
+
+def adjListToRepeatList(newAdjacencyList,folderName,repeatFilename):
+
+    N1 = len(newAdjacencyList)
+
     G2 = abunGraphLib.seqGraphWt(N1 * 2)
     for i in range(N1):
         for j in newAdjacencyList[i]:

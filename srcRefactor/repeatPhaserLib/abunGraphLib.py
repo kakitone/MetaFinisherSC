@@ -1,9 +1,11 @@
 from itertools import groupby
+from operator import itemgetter
+
 import abunHouseKeeper
 
 from finisherSCCoreLib import IORobot
 from finisherSCCoreLib import graphLib
-
+from finisherSCCoreLib import alignerRobot
 
 
 class seqGraphNodeWt(graphLib.seqGraphNode):
@@ -111,7 +113,273 @@ class seqGraphWt(graphLib.seqGraph):
     
         
 
+class seqGraphDynamic(graphLib.seqGraph):
+    
+    def initAdv(self):
+        self.N1 = len(self.graphNodesList)
+        self.runningCtr = 0
+        self.findAdjList()
+        self.mapDummyToRealDic = {}
+        self.xResolvedSimplifiedList = []
+        
+    def findAdjList(self):
+        self.adj = [[] for i in range(self.N1)]
+        
+        for i in range(self.N1):
+            for eachnext in self.graphNodesList[i].listOfNextNodes: 
+                if len(self.graphNodesList[eachnext[0]].nodeIndexList) > 0:
+                    self.adj[i].append(eachnext[0])
+            
+    def clearOut(self, u):
+        outList  = []
 
+        for eachnext in self.graphNodesList[u].listOfNextNodes:
+            outList.append(eachnext[0])
+        
+        for x in outList:
+            self.removeEdge(u,x)
+        
+    def clearIn(self, v ):
+        inList  = []
+
+        for eachprev in self.graphNodesList[v].listOfPrevNodes:
+            inList.append(eachprev[0])
+        
+        for x in inList:
+            self.removeEdge(x, v)
+
+    def clearVisitStatus(self):
+        for eachnode in self.graphNodesList:
+            eachnode.visited = False
+        
+    def reachable(self, i, j):
+        self.clearVisitStatus()
+        depthMax = 3 
+        
+        queue = [i]
+        levelQ = [0] 
+        
+        self.graphNodesList[i].visited = True
+        
+        canReach = False
+        
+        while len(queue) > 0:
+            current = queue.pop(0)
+            currentLevel = levelQ.pop(0)
+            
+            if current == j :
+                canReach = True
+                break
+            
+            if currentLevel >= depthMax:
+                break
+            
+            
+            for eachnext in self.graphNodesList[current].listOfNextNodes:
+                index = eachnext[0]
+                if self.graphNodesList[index].visited == False:
+                    queue.append(index)
+                    self.graphNodesList[index].visited = True
+                    levelQ.append(currentLevel+1)
+                    
+        self.clearVisitStatus()
+        return canReach
+    
+    
+    def condenseEdgeRemove(self, G_ContigRead):
+        print "condenseEdgeRemove"
+        thresPass = 100
+
+        for eachnode in self.graphNodesList:
+            if len(eachnode.nodeIndexList) > 0:
+                if len(eachnode.listOfNextNodes) ==1  :
+                    nextNodeIndex = eachnode.listOfNextNodes[0][0]
+                    nextNode= self.graphNodesList[nextNodeIndex]
+                    if len(nextNode.listOfPrevNodes) == 1 : 
+                        currentName = eachnode.nodeIndex
+                        nextName =  nextNode.nodeIndex
+                        print "Remove", currentName, nextName
+                        contigReadPaths = findAllPathK(currentName,nextName, G_ContigRead, 3)
+                        ctr = 0
+                        for eachpath in contigReadPaths:
+                            if len(eachpath) > 2: 
+                                ctr = ctr + 1 
+                                print eachpath
+
+                        print "ctr", ctr
+                        if ctr <= thresPass:
+                            self.removeEdge(currentName, nextName)
+
+        self.findAdjList()
+            
+    
+    def transitiveReduction(self,folderName, mummerPath, contigFile, readFile, G_ContigRead):
+        for i in range(self.N1):
+            for j in self.adj[i]:
+                self.removeEdge(i, j)
+                
+                canReach = self.reachable(i,j)
+                
+                if canReach == False:
+                    self.insertEdge(i, j, 1997)
+
+                if False:
+                    contigPaths = findAllPathK(i,j, self,3)
+                    contigReadPaths = findAllPathK(i, j ,G_ContigRead ,5)
+
+                    directPathList = []
+                    for eachp in contigReadPaths:
+                        ck = False
+                        for pitem in eachp[1:-1] :
+                            if pitem < self.N1:
+                                ck = True
+                        if ck == False:
+                            directPathList.append(eachp)
+
+                    indirectPathList = []
+                    for eachp in contigPaths:
+                        if len(eachp) > 2:
+                            tmpPath = [eachp[0]]
+                            for pp in range(len(eachp) - 1):
+                                startI, endI = eachp[pp], eachp[pp+1]
+                                pathList = findAllPathK(startI, endI , G_ContigRead,3)
+                                tmpPath = tmpPath + pathList[0][1:]
+                            
+                            indirectPathList.append(tmpPath)
+
+                    formPathSeq(folderName, mummerPath, directPathList, indirectPathList, contigFile, readFile)
+
+                    toDelete = decideCut(folderName, mummerPath)
+                    if not toDelete : 
+                        self.insertEdge(i,j, 1997)
+        self.findAdjList()
+
+
+
+    def doubleEdgeReduction(self):
+        for u in range(self.N1):
+            for v in self.adj[u]:
+                if u in self.adj[v]:
+                    self.removeEdge(u,v)
+                    self.removeEdge(v,u)
+
+
+        self.findAdjList()
+
+
+    def bipartiteResolve(self, resolvedList):
+        for e in resolvedList:
+            u, v =e[0], e[-1]
+            self.clearOut(u)
+            self.clearIn(v)
+            
+            self.insertEdge(u,v,1997)
+    
+
+    def bipartiteLocalResolve(self, resolvedList, inList, outList):
+
+        for u in inList:
+            self.clearOut(u/2)
+
+        for v in outList:
+            self.clearIn(v/2)
+
+        for e in resolvedList:
+            u, v =e[0], e[-1]
+
+            self.insertEdge(u,v,1997)
+
+
+    def symGraph(self):
+        for u in range(len(self.graphNodesList)):
+            uComp = findMyComp(u)
+            
+            for vI in self.graphNodesList[u].listOfNextNodes:
+                v = vI[0]
+                vComp = findMyComp(v)
+
+                if not graphLib.nameInEdgeList(vComp, self.graphNodesList[uComp].listOfPrevNodes):
+                    self.removeEdge(u,v)
+
+            for vI in self.graphNodesList[u].listOfPrevNodes:
+                v = vI[0]
+                vComp = findMyComp(v)
+
+                if not graphLib.nameInEdgeList(vComp, self.graphNodesList[uComp].listOfNextNodes):
+                    self.removeEdge(v,u)
+
+
+
+
+    def xResolve(self, xResolvedList):
+        self.mapDummyToRealDic = {}
+        self.xResolvedSimplifiedList = []
+        
+        for i in range(self.N1):
+            for y in xResolvedList[i]:
+                
+                inNode = y[0]
+                outNode = y[-1]
+                
+                for eachprev in self.graphNodesList[i].listOfPrevNodes:
+                    key =  eachprev[0]
+                    if key >= self.N1 and self.mapDummyToRealDic[key-self.N1][0] == y[0]:
+                        inNode = key 
+                
+                for eachnext in self.graphNodesList[i].listOfNextNodes:
+                    key =  eachnext[0]
+                    if key >= self.N1 and self.mapDummyToRealDic[key-self.N1][0] == y[-1]:
+                        outNode = key 
+                
+                
+                if len(self.graphNodesList[i].listOfPrevNodes) == 1 and len(self.graphNodesList[i].listOfNextNodes) ==1: 
+
+                    self.xResolvedSimplifiedList.append([inNode, i])
+                    self.xResolvedSimplifiedList.append([i, outNode])
+                else:
+
+
+                    self.graphNodesList.append(graphLib.seqGraphNode(self.N1+self.runningCtr))
+                    
+                    if False:
+                        toRemoveList = []
+
+                        for outgo in self.graphNodesList[inNode].listOfNextNodes:
+                            toRemoveList.append([inNode, outgo[0]])    
+
+                        for income in self.graphNodesList[outNode].listOfPrevNodes:    
+                            toRemoveList.append([income[0], outNode])
+
+                        for eachpair in toRemoveList:
+                            self.removeEdge(eachpair[0], eachpair[1]) 
+                    else:
+                        self.removeEdge(inNode,i )
+                        self.removeEdge(i, outNode)
+
+
+
+                    self.insertEdge(inNode, self.N1 + self.runningCtr, 1997)
+                    self.insertEdge(self.N1 + self.runningCtr, outNode, 1997)
+
+                    self.mapDummyToRealDic[self.runningCtr] = [ [i] , self.graphNodesList[i].nodeIndexList ]
+                    
+                    self.xResolvedSimplifiedList.append([inNode, self.N1 + self.runningCtr])
+                    self.xResolvedSimplifiedList.append([self.N1 + self.runningCtr, outNode])
+                    
+
+                    
+                    self.runningCtr = self.runningCtr + 1
+                
+                
+
+def findMyComp(u):
+
+    if u %2 == 0:
+        myComp = u+1
+    else:
+        myComp = u-1
+    return myComp
+    
 def findAllReachable(i, N1, G):
     for eachnode in G.graphNodesList:
         eachnode.visited = False
@@ -221,6 +489,20 @@ def formReverseGraph(G):
             haveInserted = graphLib.nameInEdgeList(j, G.graphNodesList[i].listOfNextNodes) 
             if haveInserted:      
                 Grev.insertEdge(j, i, 100)
+    return Grev
+
+
+def formReverseGraphFast(G):
+    nNode = len(G.graphNodesList)
+    Grev = seqGraphWt(nNode)
+    for i in range(nNode):
+        tmpList = G.graphNodesList[i].listOfNextNodes
+        Grev.graphNodesList[i].listOfPrevNodes = tmpList
+        
+        tmpList = G.graphNodesList[i].listOfPrevNodes
+        Grev.graphNodesList[i].listOfNextNodes = tmpList
+
+
     return Grev
 
 
@@ -453,10 +735,14 @@ def checkPathLength(path, G, N1, folderName):
 
 
 def findPathBtwEnds(folderName, leftCtgIndex, rightCtgIndex, contigReadGraph, N1):
-    readList = []
     
     G = graphLib.seqGraph(0)
     G.loadFromFile(folderName, contigReadGraph)
+    
+    return findPathBtwEndsFast(folderName, leftCtgIndex, rightCtgIndex, G, N1)
+
+def findPathBtwEndsFast(folderName, leftCtgIndex, rightCtgIndex, G, N1):
+    readList = []
     
     for eachnode in G.graphNodesList:
         eachnode.visited = False
@@ -477,6 +763,133 @@ def findPathBtwEnds(folderName, leftCtgIndex, rightCtgIndex, contigReadGraph, N1
         readList = returnPath 
         
         return readList 
+
+
+def findAllPathK(u,v,G,k):
+    allPathList = BFS_revisit(u,v,G,k)
+    return allPathList
+
+def BFS_revisit(u, v, G, k):
+    resultList = []
+    isEdge = graphLib.nameInEdgeList(v, G.graphNodesList[u].listOfNextNodes)
+
+    if isEdge:
+        resultList.append([u,v])
+
+    if k>1:
+        for w in G.graphNodesList[u].listOfNextNodes:
+            returnList = BFS_revisit(w[0],v,G,k-1)
+            for p in returnList:
+                tmpList = [u]
+                for i in p:
+                    tmpList.append(i)
+
+                resultList.append(tmpList)
+
+    return resultList
+
+def formPathSeq(folderName, mummerPath, directPathList, indirectPathList, contigFile, readFile):
+    '''
+    Input : directPathList, indirectPathList, contigFile, readFile
+    Output: directPath.fasta, indirectPath.fasta
+    '''
+
+    contigList = IORobot.readContigsFromFile(folderName,contigFile)
+    readList = IORobot.readContigsFromFile(folderName,readFile)
+    
+    directPathSeqList =  IORobot.pathListToSeqListTransform(directPathList, contigList, readList, mummerPath, folderName)    
+    indirectPathSeqList =  IORobot.pathListToSeqListTransform(indirectPathList, contigList, readList, mummerPath, folderName)    
+
+    IORobot.writeSegOut(directPathSeqList,folderName,"directPath.fasta")
+    IORobot.writeSegOut(indirectPathSeqList,folderName,"indirectPath.fasta")
+
+
+def decideCut(folderName, mummerPath):
+    
+    '''
+    Input : directPath.fasta, indirectPath.fasta
+    Output : toDelete 
+    '''
+    thres = 50
+    
+    if True:
+        alignerRobot.useMummerAlign(mummerPath, folderName, \
+            "indirectvsdirect", "indirectPath.fasta", "directPath.fasta", specialForRaw = False, specialName = "", refinedVersion= True)
+    
+    dataList =  alignerRobot.extractMumData(folderName , "indirectvsdirectOut")
+    lenDic = IORobot.obtainLength(folderName, "directPath.fasta")
+
+    ctr =0 
+    ctrindirect = 0 
+
+    dataList.sort(key = itemgetter(-1))
+
+    toDelete = True
+
+    for key, items in groupby(dataList, itemgetter(-1)):
+        print "key", key 
+        ctr = ctr + 1
+        isFound = False
+        for eachitem in items:
+            if eachitem[2] < thres and eachitem[3] > lenDic[key] - thres:
+                isFound = True
+
+        if isFound:
+            ctrindirect = ctrindirect + 1
+
+
+    epsilon = 1.1
+
+    print "ctrindirect, ctr", ctrindirect, ctr
+
+    if ctrindirect*1.0/ctr < (1- epsilon):
+        toDelete = False
+    else:
+        toDelete = True
+
+
+    return toDelete
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

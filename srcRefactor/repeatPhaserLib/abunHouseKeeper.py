@@ -1,16 +1,97 @@
 from itertools import groupby
 import os 
+from finisherSCCoreLib import IORobot
 
-abunGlobalAvoidrefine = False
-abunGlobalReadSearchDepth = 1
-abunGlobalRRDisable = False
+abunGlobalAvoidrefine = True
+abunGlobalReadSearchDepth = 0
+abunGlobalRRDisable = True
+abunGlobalRunPickUp = "map"
+
+class abunSplitParameterRobot():
+    def __init__(self):
+        self.runGraphSurgery = True
+        self.runBResolve = True
+        self.runXResolve = True
+
+        self.parameterForGraphSurgery()
+        self.parameterForBResolve()
+        self.parameterForXResolve()
+
+        self.BRThres = 2
+        self.AbunLower = 0.5
+        self.AbunUpper = 1.95
+
+        self.avoidrefine = abunGlobalAvoidrefine
+        self.readSearchDepth = abunGlobalReadSearchDepth
+        self.rrDisable = abunGlobalRRDisable
+
+    def parameterForGraphSurgery(self):
+        self.edgeThres = 1
+        self.kthres = 3
+
+        self.toRunCondenseRemove = True
+        self.toRunTransitive = True
+        self.toRunDoubltPtr = True
+
+
+    def parameterForBResolve(self):
+        self.toRunAggB = False
+        self.toRunBRB = True
+        self.toRunAbunB = True
+        self.RThres = 5
+
+        self.BRThresB = -1
+        self.AbunLowerB = -1
+        self.AbunUpperB = -1
+    
+
+    def parameterForXResolve(self):
+        self.toRunAggX = False
+        self.toRunBRX = True
+        self.toRunAbunX = True
+
+        self.BRThresX = -1
+        self.AbunLowerX = -1
+        self.AbunUpperX = -1
+
+    def loadData(self, initial_data):
+        canLoad = True
+        self.avoidrefine = abunGlobalAvoidrefine
+        self.readSearchDepth = abunGlobalReadSearchDepth
+        self.rrDisable = abunGlobalRRDisable
+
+        for key in initial_data:
+            if hasattr(self, key):
+                if initial_data[key] =='True' :
+                    setattr(self, key, True)
+                elif initial_data[key] == 'False':
+                    setattr(self, key, False)
+                else:
+                    setattr(self, key, float(initial_data[key]))
+            else:
+                canLoad = False
+        return canLoad
+
+  
+abunGlobalSplitParameterRobot = abunSplitParameterRobot()
+
 
 def replaceFiles( folderName, replacedName) :
     commandList = []
     commandList.append("cp " + folderName + "improved3.fasta " + folderName + "improved3_backup.fasta")
     commandList.append("cp " + folderName + "improved3_Double.fasta " + folderName + "improved3_backup.fasta")
     
+    IORobot.writeToFile_Double1(folderName, replacedName[0:-6]+".fasta", replacedName[0:-6]+"_Double.fasta", "contig")
+    
     commandList.append("cp " + folderName + replacedName + " "+folderName + "improved3.fasta")
+    
+    command = "perl -pe 's/>[^\$]*$/\">Segkk\" . $n++ .\"\n\"/ge' "+folderName+"improved3.fasta > "+folderName+"newImproved3.fasta "
+    commandList.append(command)
+    
+    command = "cp " +folderName+"newImproved3.fasta  "+folderName+"improved3.fasta "
+    commandList.append(command)
+
+
     commandList.append("cp " + folderName + replacedName[0:-6]+"_Double.fasta " + folderName + "improved3_Double.fasta")
     
     for eachcommand in commandList:

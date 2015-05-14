@@ -60,7 +60,14 @@ class seqGraph(object):
                         elif i == 4:
                             self.graphNodesList[runningIndex].listOfNextNodes.append([int(mydata[0]), int(mydata[1])])
                 elif i == 5:
-                    self.graphNodesList[runningIndex].visited = int(dataList[i])
+                    if dataList[i] == "True":
+                        self.graphNodesList[runningIndex].visited = 1
+            
+                    elif dataList[i] == "False":
+                        self.graphNodesList[runningIndex].visited = 0
+            
+                    else:
+                        self.graphNodesList[runningIndex].visited = int(dataList[i])
             
                 
             tmp = f.readline().rstrip()

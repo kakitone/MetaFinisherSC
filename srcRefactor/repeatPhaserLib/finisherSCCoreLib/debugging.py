@@ -4,7 +4,8 @@ import IORobot
 import alignerRobot
 from itertools import groupby
 from operator import itemgetter
-
+import os
+import nonRedundantResolver
 
 def f(x, kk):
     print "in"
@@ -150,3 +151,8 @@ def getBreakPointFromDataList(folderName, dataList):
 
     return blkDic
 
+def fixFinal():
+    os.system("cp Apr07Test/abun.fasta Apr07Test/contigs.fasta")
+    nonRedundantResolver.removeEmbedded("Apr07Test/", "/usr/bin/")
+
+fixFinal()

@@ -113,7 +113,6 @@ def putListToFileO(folderName, sourceFileName, targetFileName, myList):
 
 
 
-
 def writeToFile_Double1(folderName, fileName1, fileName2, option="contig"):
 
     f2 = open(folderName + fileName2, 'w')
@@ -572,7 +571,7 @@ def joinSeg(tmp, folderName, segLookUp, mummerLink, gapContentLookUpDic):
     for i in range(len(tmp)-1):
         
         begin, end = tmp[i], tmp[i+1]
-        leftEnd, rightStart, middleContent , = gapContentLookUpDic[str(begin) + "_" + str(end)]
+        leftEnd, rightStart, middleContent = gapContentLookUpDic[str(begin) + "_" + str(end)]
         ctg = ctg + segLookUp[begin][0:leftEnd] + middleContent
         
     ctg = ctg + segLookUp[tmp[-1]]
@@ -623,22 +622,50 @@ def fastaContigNameIndexConversion(folderName, filename):
     
     return name2Index, index2Name
     
-def extractGraphToContigs(G, folderName, mummerLink, fileout, filein, gapContentLookUpDic):
-    N1 = len(G.graphNodesList)
+def extractGraphToContigs(G, folderName, mummerLink, fileout, filein, gapContentLookUpDic, mapDummyToRealDic= {}):
+    
+    N1 = len(G.graphNodesList) - len(mapDummyToRealDic)
     markedList = [False for i in range(N1/2)]
     
     segLookUp = readContigsFromFile(folderName, filein)
     
     ctgList = []
     for eachnode in G.graphNodesList:
-        if len(eachnode.nodeIndexList) > 0: 
-            tmp = eachnode.nodeIndexList 
-            isIncluded  = checkIncluded(tmp, markedList)
-            for eachitem in tmp: 
-                markedList[eachitem/2] = True
-            if not isIncluded :
-                ctgtmpList = joinSeg(tmp, folderName, segLookUp, mummerLink, gapContentLookUpDic)
-                ctgList = ctgList + ctgtmpList
+        if eachnode.nodeIndex < N1:
+            if len(eachnode.nodeIndexList) > 0: 
+                myNodeIndexList = eachnode.nodeIndexList 
+                toCkIncludedList = []
+                tmp = []
+                
+                for kk in myNodeIndexList:
+                    if kk < N1:
+                        toCkIncludedList.append(kk)
+                
+                for kk in myNodeIndexList:
+                    if kk < N1:
+                        tmp.append(kk)
+                    else:
+                        # tmp.append(mapDummyToRealDic[str(kk-N1)])
+                        tmp = tmp + mapDummyToRealDic[str(kk-N1)][1]
+                
+                
+                isIncluded  = checkIncluded(toCkIncludedList, markedList)
+                
+                if not isIncluded :
+                    for eachitem in tmp: 
+                        markedList[eachitem/2] = True
+
+                    ctgtmpList = joinSeg(tmp, folderName, segLookUp, mummerLink, gapContentLookUpDic)
+                    ctgList = ctgList + ctgtmpList
+    
+    missingSegments = []
+    for i in range(len(markedList)):
+        if markedList[i] == False: 
+            missingSegments.append(segLookUp[2*i])
+    
+    print "len(missingSegments): " , len(missingSegments)
+    
+    ctgList = ctgList + missingSegments
     
     writeSegOut(ctgList, folderName, fileout)
             
@@ -662,4 +689,42 @@ def myRead(folderName, fileName,readName) :
     f.close()
     
     return returnStr
+
+
+def pathListToSeqListTransform(pathList, contigList, readList, mummerPath, folderName):
+    pathSeqList  = []
+
+    for p in pathList:
+        pSeq = alignAndMerge(p, contigList, readList, mummerPath, folderName)
+        pathSeqList.append(pSeq)
+
+    return pathSeqList
+
+
+
+def alignAndMerge(p, contigList, readList, mummerPath, folderName):
+    pSeq = []
+
+    N1 = len(contigList)
+
+    pSeg = contigList[p[0]]
+
+    for i in range(len(p)-1):
+        if p[i] < N1:
+            leftSeg = contigList[p[i]]
+        else:
+            leftSeg = readList[p[i]- N1]
+
+        if p[i+1] < N1:
+            rightSeg = contigList[p[i+1]]
+        else:
+            rightSeg = readList[p[i+1]- N1]
+
+        overlap = align(leftSeg,rightSeg,folderName,mummerPath)
+
+        rightStart = overlap[1]
+        pSeg = pSeg + rightSeg[rightStart:]
+
+    return pSeg
+
 

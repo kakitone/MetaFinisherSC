@@ -11,7 +11,7 @@ from finisherSCCoreLib import houseKeeper
 
 def addDataToList(dataList, G, startIndex1, startIndex2, type1, type2):
 
-    threshold = 20
+    threshold = 50
     
     for eachitem in dataList:
         wt = min(eachitem[4] , eachitem[5])

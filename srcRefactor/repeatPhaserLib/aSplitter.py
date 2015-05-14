@@ -4,6 +4,8 @@ from finisherSCCoreLib import houseKeeper
 import time
 import argparse
 import abunHouseKeeper
+import os 
+import json
 
 t0 = time.time()
 
@@ -20,6 +22,10 @@ parser.add_argument('-rp', '--replace', help= 'Input files to aSplitter(e.g. noE
 parser.add_argument('-ar', '--avoidrefine', help= 'Avoid refined abundance estimation (input is True)', required=False)
 parser.add_argument('-rs', '--readsearch', help= 'Number of linking reads across a gap  (input is number of such linking reads/2)', required=False)
 parser.add_argument('-rd', '--RRDisable', help= 'Whether one should disable Read to Read overlap check (input is True)', required=False)
+parser.add_argument('-pk', '--pickup', help= 'where to run ASplitter, map/count/split', required=False)
+
+
+parser.add_argument('-op', '--option', help='File of parameter list (input is opa=true opb=false)', required=False)
 
 
 args = vars(parser.parse_args())
@@ -35,7 +41,7 @@ else:
 if args['parallel'] != None:
     houseKeeper.globalParallel = int(args['parallel'])
 else:
-    houseKeeper.globalParallel = 1
+    houseKeeper.globalParallel = 20
 
 
 if args['large'] == "True":
@@ -57,8 +63,9 @@ else:
 
 
 if args['replace'] != None : 
-    replacedName = args['replace']
-    abunHouseKeeper.replaceFiles( newFolderName, replacedName) 
+    abunHouseKeeper.replaceFiles( newFolderName, args['replace']) 
+else:
+    abunHouseKeeper.replaceFiles( newFolderName, "mFixed.fasta")
 
 if args['RRDisable'] == "True":
     abunHouseKeeper.abunGlobalRRDisable = True
@@ -66,10 +73,31 @@ else:
     abunHouseKeeper.abunGlobalRRDisable = False
 
 
+if args['pickup'] in [ "map", "count", "split"] :
+    abunHouseKeeper.abunGlobalRunPickUp = args['pickup']
 
-if pathExists:
-    abunSplitter.mainFlow(newFolderName, newMummerLink)
+
+if args['option'] != None:
+    settingDataCombo = args['option'].split()
+    settingDic = {}
+
+    for eachitem in settingDataCombo:
+        tmp = eachitem.split('=')
+        settingDic[tmp[0]] = tmp[1]
+
+    canLoad = abunHouseKeeper.abunGlobalSplitParameterRobot.loadData(settingDic)
+    if canLoad:
+        settingDic = abunHouseKeeper.abunGlobalSplitParameterRobot.__dict__
+        with open(newFolderName + "option.json", 'w') as f:
+            json.dump(settingDic, f)
 else:
-    print "Sorry. The above folders or files are missing. If you continue to have problems, please contact me(Ka-Kit Lam) at kklam@eecs.berkeley.edu"
+    canLoad = True    
+
+if pathExists and canLoad:
+    abunSplitter.mainFlow(newFolderName, newMummerLink)
+
+
+else:
+    print "Sorry. The above folders or files are missing or options are not correct. If you continue to have problems, please contact me(Ka-Kit Lam) at kklam@eecs.berkeley.edu"
 
 print  "Time", time.time() - t0

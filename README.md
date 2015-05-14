@@ -11,11 +11,11 @@ The final output is **abun.fasta** after running through the M-Fixer(mis-assembl
 
 In order to do that, here are the steps. 
 
-1. Run M-Fixer which fix misassemblies with information from reads(key intermediate output here is mFixed.fasta).
+1. Run M-Fixer which fix misassemblies with information from reads (input is LR.fasta, LC.fasta ; output is mFixed.fasta).
 
         python -m srcRefactor.misassemblyFixerLib.mFixer destinedFolder mummerPath 
 
-2. Run A-Splitter to join contigs based on abundance and overlap information (key intermediate output here is abun.fasta)
+2. Run A-Splitter to join contigs based on abundance and overlap information (input is mFixed.fasta, raw_reads.fasta(which is copied from LR.fasta after running M-Fixer, so there is no need to rename if you run M-Fixer first); output is abun.fasta)
 
         python -m srcRefactor.repeatPhaserLib.aSplitter destinedFolder mummerPath
 

@@ -15,7 +15,7 @@ In order to do that, here are the steps.
 
         python -m srcRefactor.misassemblyFixerLib.mFixer destinedFolder mummerPath 
 
-2. Run A-Splitter to join contigs based on abundance information (key intermediate output here is abun.fasta)
+2. Run A-Splitter to join contigs based on abundance and overlap information (key intermediate output here is abun.fasta)
 
         python -m srcRefactor.repeatPhaserLib.aSplitter destinedFolder mummerPath
 

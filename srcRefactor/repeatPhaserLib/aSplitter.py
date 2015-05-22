@@ -50,16 +50,16 @@ else:
     houseKeeper.globalLarge = False
 
 
-if args['avoidrefine'] == "True":
-    abunHouseKeeper.abunGlobalAvoidrefine = True
-else:
+if args['avoidrefine'] == "False":
     abunHouseKeeper.abunGlobalAvoidrefine = False
+else:
+    abunHouseKeeper.abunGlobalAvoidrefine = True
 
 
 if args['readsearch'] != None:
     abunHouseKeeper.abunGlobalReadSearchDepth = int(args['readsearch']) 
 else:
-    abunHouseKeeper.abunGlobalReadSearchDepth = 1
+    abunHouseKeeper.abunGlobalReadSearchDepth = 0
 
 
 if args['replace'] != None : 
@@ -67,10 +67,10 @@ if args['replace'] != None :
 else:
     abunHouseKeeper.replaceFiles( newFolderName, "mFixed.fasta")
 
-if args['RRDisable'] == "True":
-    abunHouseKeeper.abunGlobalRRDisable = True
-else:
+if args['RRDisable'] == "False":
     abunHouseKeeper.abunGlobalRRDisable = False
+else:
+    abunHouseKeeper.abunGlobalRRDisable = True
 
 
 if args['pickup'] in [ "map", "count", "split"] :
@@ -86,12 +86,14 @@ if args['option'] != None:
         settingDic[tmp[0]] = tmp[1]
 
     canLoad = abunHouseKeeper.abunGlobalSplitParameterRobot.loadData(settingDic)
-    if canLoad:
-        settingDic = abunHouseKeeper.abunGlobalSplitParameterRobot.__dict__
-        with open(newFolderName + "option.json", 'w') as f:
-            json.dump(settingDic, f)
 else:
     canLoad = True    
+
+if canLoad:
+    settingDic = abunHouseKeeper.abunGlobalSplitParameterRobot.__dict__
+    with open(newFolderName + "option.json", 'w') as f:
+        json.dump(settingDic, f)
+
 
 if pathExists and canLoad:
     abunSplitter.mainFlow(newFolderName, newMummerLink)

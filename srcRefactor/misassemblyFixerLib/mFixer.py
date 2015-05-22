@@ -51,12 +51,15 @@ if args['option'] != None:
         settingDic[tmp[0]] = tmp[1]
 
     canLoad = merger.mergerGlobalFixerRobot.loadData(settingDic)
-    if canLoad:
-        settingDic = merger.mergerGlobalFixerRobot.__dict__
-        with open(newFolderName + "optionMFixer.json", 'w') as f:
-            json.dump(settingDic, f)
 else:
     canLoad = True    
+
+
+if canLoad:
+    settingDic = merger.mergerGlobalFixerRobot.__dict__
+    with open(newFolderName + "optionMFixer.json", 'w') as f:
+        json.dump(settingDic, f)
+
 
 if canLoad == True:
     merger.mainFlow(newFolderName, newMummerLink)

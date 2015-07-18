@@ -33,6 +33,10 @@ class abunSplitParameterRobot():
         self.toRunTransitive = True
         self.toRunDoubltPtr = True
 
+        self.thresMiddleContig = 30
+        self.lenthresMiddleContig = -1
+        self.bestMatchContigOnly = True
+
 
     def parameterForBResolve(self):
         self.toRunAggB = False

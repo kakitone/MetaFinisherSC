@@ -63,7 +63,10 @@ else:
 
 
 if args['replace'] != None : 
-    abunHouseKeeper.replaceFiles( newFolderName, args['replace']) 
+    if  args['replace'] == 'skip':
+        print "skip copy"
+    else:
+        abunHouseKeeper.replaceFiles( newFolderName, args['replace']) 
 else:
     abunHouseKeeper.replaceFiles( newFolderName, "mFixed.fasta")
 

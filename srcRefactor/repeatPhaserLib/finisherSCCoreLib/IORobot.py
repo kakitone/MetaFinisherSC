@@ -512,10 +512,16 @@ def checkIncluded(tmp, markedList):
     return isIncluded
 
 
+
+
 def align(leftSeg, rightSeg, folderName, mummerLink):
+    return alignWithName(leftSeg, rightSeg, folderName, mummerLink, "overlap")    
+
+
+def alignWithName(leftSeg, rightSeg, folderName, mummerLink, nameOfOut):
     overlap = [0, 0 ] 
     lLen = 0
-    f = open(folderName + "leftSeg.fasta", 'w')
+    f = open(folderName + nameOfOut+"leftSeg.fasta", 'w')
     f.write(">SegL\n")
     
     if len(leftSeg) < 50000:
@@ -527,7 +533,7 @@ def align(leftSeg, rightSeg, folderName, mummerLink):
     f.close()
     
     rLen = 0
-    f = open(folderName + "rightSeg.fasta", 'w')
+    f = open(folderName + nameOfOut+"rightSeg.fasta", 'w')
     f.write(">SegR\n")
     if len(rightSeg) < 50000:
         f.write(rightSeg)
@@ -540,8 +546,8 @@ def align(leftSeg, rightSeg, folderName, mummerLink):
     
     
     #alignerRobot.useMummerAlign(mummerLink, folderName, "overlap", "leftSeg.fasta", "rightSeg.fasta", False)
-    alignerRobot.useMummerAlign(mummerLink, folderName, "overlap", "leftSeg.fasta", "rightSeg.fasta", specialForRaw = False, specialName = "", refinedVersion= True)
-    dataList =  alignerRobot.extractMumData(folderName , "overlapOut")
+    alignerRobot.useMummerAlign(mummerLink, folderName, nameOfOut, nameOfOut+"leftSeg.fasta", nameOfOut+"rightSeg.fasta", specialForRaw = False, specialName = "", refinedVersion= True)
+    dataList =  alignerRobot.extractMumData(folderName , nameOfOut+"Out")
     
     thres = 10
     

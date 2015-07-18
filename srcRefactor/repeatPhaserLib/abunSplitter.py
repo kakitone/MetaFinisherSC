@@ -6,7 +6,7 @@ from operator import itemgetter
 import copy
 import sys
 from random import shuffle
-
+from multiprocessing import Pool
 
 from finisherSCCoreLib import alignerRobot
 from finisherSCCoreLib import graphLib
@@ -83,7 +83,6 @@ def getCtTwoToOneAgg(inList ,myCountDic, Gnew, lenDic):
         newInList.append(eachitem*2)
 
     return getCtAgg(newInList ,myCountDic, Gnew, lenDic)
-
 
 def satisfyMatch(initem ,newOutList, sd):
     print "AbunLower, AbunUpper", abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLower,abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpper
@@ -203,102 +202,124 @@ def generateGapContentLookup(folderName, mummerLink, oldResolvedList, contigRead
         for ii in range(len(tmpList)-1):
             resolvedList.append([tmpList[ii], tmpList[ii+1]])
         
-        
+    gapContentLookUpList = parallelGapLookUp(resolvedList,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename)
+
+    return gapContentLookUpList   
+
+
+def parallelGapLookUp(resolvedList,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename):
+    p = Pool(processes=houseKeeper.globalParallel)
+    results = []
+    
     for eachmatchpair in resolvedList:
-        print eachmatchpair
-        leftCtgIndex ,rightCtgIndex, leftEnd, rightStart, middleContent = eachmatchpair[0],eachmatchpair[-1],0,0,""
-        
-        succReadsList = abunGraphLib.findPathBtwEnds(folderName, leftCtgIndex, rightCtgIndex, contigReadGraph, N1)
-        
-        succReadsList = []
-        G = graphLib.seqGraph(0)
-        G.loadFromFile(folderName, contigReadGraph)
-        
-        allPaths = abunGraphLib.findAllPathK(leftCtgIndex,rightCtgIndex,G, 5)
-        # shuffle(allPaths)
+        results.append(p.apply_async(singleGapLookUp, args=(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename)))
 
-        print "allPaths" , allPaths
-        
-        possibleList = []
-        for p in allPaths:
-            noContig = True
-            for pp in p[1:-1]:
-                if pp < N1:
-                    noContig = False
-            if noContig == True:
-                possibleList.append(p)
-        print "possibleList", possibleList
+    
+    outputlist = [itemkk.get() for itemkk in results]
+    print  len(outputlist)
+    p.close()
 
-        minListLen = 1000
-        for p in possibleList:
-            if len(p) < minListLen:
-                succReadsList = p
-                minListLen = len(p)
+    return outputlist
 
+
+def singleGapLookUp(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename):
+
+    print eachmatchpair
+    leftCtgIndex ,rightCtgIndex, leftEnd, rightStart, middleContent = eachmatchpair[0],eachmatchpair[-1],0,0,""
+    
+    succReadsList = abunGraphLib.findPathBtwEnds(folderName, leftCtgIndex, rightCtgIndex, contigReadGraph, N1)
+    
+    succReadsList = []
+    G = graphLib.seqGraph(0)
+    G.loadFromFile(folderName, contigReadGraph)
+    
+    allPaths = abunGraphLib.findAllPathK(leftCtgIndex,rightCtgIndex,G, 5)
+    # shuffle(allPaths)
+
+    print "allPaths" , allPaths
+    
+    possibleList = []
+    for p in allPaths:
+        noContig = True
+        for pp in p[1:-1]:
+            if pp < N1:
+                noContig = False
+        if noContig == True:
+            possibleList.append(p)
+    print "possibleList", possibleList
+
+    minListLen = 1000
+    for p in possibleList:
+        if len(p) < minListLen:
+            succReadsList = p
+            minListLen = len(p)
+
+    if len(succReadsList) > 0:
         succReadsList.pop(0)
         succReadsList.pop(-1)
+    else:
+        print "interesting item for future study"
 
-        print "succReadsList" , succReadsList
+    print "succReadsList" , succReadsList
+    
+    if len(succReadsList) == 0:
+        contigName = abunHouseKeeper.parseIDToName(leftCtgIndex, 'C', N1)
+        leftSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
+
+        contigName = abunHouseKeeper.parseIDToName(rightCtgIndex, 'C', N1)
+        rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
         
-        if len(succReadsList) == 0:
-            contigName = abunHouseKeeper.parseIDToName(leftCtgIndex, 'C', N1)
-            leftSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
-
-            contigName = abunHouseKeeper.parseIDToName(rightCtgIndex, 'C', N1)
-            rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
-            
-            overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
-            
-            print "overlap contig : ", overlap
-            
-            leftEnd = len(leftSeg) - overlap[0]
-            middleContent = ""
-            
-        else:
-            
-            contigName = abunHouseKeeper.parseIDToName(leftCtgIndex, 'C', N1)
-            print contigName
-            leftSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
-            
-            readName = abunHouseKeeper.parseIDToName(succReadsList[0], 'R', N1)
-            print readName
+        overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
+        
+        print "overlap contig : ", overlap
+        
+        leftEnd = len(leftSeg) - overlap[0]
+        middleContent = ""
+        
+    else:
+        
+        contigName = abunHouseKeeper.parseIDToName(leftCtgIndex, 'C', N1)
+        print contigName
+        leftSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
+        
+        readName = abunHouseKeeper.parseIDToName(succReadsList[0], 'R', N1)
+        print readName
+        rightSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
+        
+        overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
+        
+        print "overlap start read : ", overlap
+        
+        leftEnd = len(leftSeg) - overlap[0]
+        
+        middleContent = ""
+        
+        for i in range(len(succReadsList)-1):
+            readName = abunHouseKeeper.parseIDToName(succReadsList[i], 'R', N1)
+            leftSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
+        
+            readName = abunHouseKeeper.parseIDToName(succReadsList[i+1], 'R', N1)
             rightSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
             
-            overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
-            
-            print "overlap start read : ", overlap
-            
-            leftEnd = len(leftSeg) - overlap[0]
-            
-            middleContent = ""
-            
-            for i in range(len(succReadsList)-1):
-                readName = abunHouseKeeper.parseIDToName(succReadsList[i], 'R', N1)
-                leftSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
-            
-                readName = abunHouseKeeper.parseIDToName(succReadsList[i+1], 'R', N1)
-                rightSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
-                
-                overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
-                print "overlap middle read : ", overlap
-                middleContent = middleContent + leftSeg[0:len(leftSeg)-overlap[0]] 
-            
-            
-            readName = abunHouseKeeper.parseIDToName(succReadsList[-1], 'R', N1)
-            leftSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
-            
-            contigName = abunHouseKeeper.parseIDToName(rightCtgIndex, 'C', N1)
-            rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
-            
-            overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
-            print "overlap end read : ", overlap
-            
-            middleContent = middleContent + leftSeg[0:len(leftSeg)-overlap[0]]
-            
+            overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
+            print "overlap middle read : ", overlap
+            middleContent = middleContent + leftSeg[0:len(leftSeg)-overlap[0]] 
         
-        gapContentLookUpList.append([leftCtgIndex ,rightCtgIndex, leftEnd, rightStart, middleContent])
         
-    return gapContentLookUpList   
+        readName = abunHouseKeeper.parseIDToName(succReadsList[-1], 'R', N1)
+        leftSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
+        
+        contigName = abunHouseKeeper.parseIDToName(rightCtgIndex, 'C', N1)
+        rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
+        
+
+        overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
+        print "overlap end read : ", overlap
+        
+        middleContent = middleContent + leftSeg[0:len(leftSeg)-overlap[0]]
+
+    return [leftCtgIndex ,rightCtgIndex, leftEnd, rightStart, middleContent]
+    
 
 def abunSplit(folderName, mummerLink, myCountDic,contigReadGraph,  contigFilename,readsetFilename ):
     
@@ -407,7 +428,7 @@ def evaluateCoverage(dataList, lenDic, readLenDic, folderName,mummerLink, contin
     myCountDic = {}
     for eachitem in lenDic:
         myCountDic[eachitem] = 0
-            
+    
     dataList.sort(key = itemgetter(-1)) 
     
     ctkk, ctbase = 0, 0
@@ -838,6 +859,11 @@ def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFil
             Gnew.removeEdge(u, yIndex)
 
 
+
+    ### Trying out the new component 
+    import toCondenseFixer
+    Gnew = toCondenseFixer.noGoZoneDefiner(Gnew, folderName)
+
     Gnew.symGraph()
     ### End filter adaptor skipped case 
 
@@ -845,7 +871,7 @@ def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFil
     
         Gnew.initAdv()    
         if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunCondenseRemove:
-            Gnew.condenseEdgeRemove(G)
+            Gnew.condenseEdgeRemove(G, folderName, mummerLink, contigFilename)
 
         if abunHouseKeeper.abunGlobalSplitParameterRobot.toRunDoubltPtr:
             Gnew.doubleEdgeReduction()
@@ -884,6 +910,7 @@ def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic):
 
         Grev = abunGraphLib.formReverseGraphFast(G)
 
+        abunAnalysisList = []
 
         for eachitem in repeatPairs:
             inList, outList = eachitem[0], eachitem[1]
@@ -915,22 +942,34 @@ def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic):
             combinedList = abunHouseKeeper.getDistinct(resolvedList + brResolvedList)
             
             print "resolvedList, brResolvedList, inList, outList", resolvedList, brResolvedList, inList, outList
+            
             print "resolveConflict(combinedList)", resolveConflict(combinedList)      
 
-
-            if  len(inList) <= maxRThres and  len(outList) <= maxRThres and len(inList) > 0 and len(outList) > 0 :
+            abunAnalysisList.append([inList, outList,resolvedList, brResolvedList, resolveConflict(combinedList) ])
+            if  len(inList) <= maxRThres and  len(outList) <= maxRThres and len(inList) > 0 and len(outList) > 0:
                 #biResolvedCombineList += resolveConflict(combinedList)
                 
                 resolvedCombine = resolveConflict(combinedList)
+        ### kkdebug 
+                Gnew.bipartiteLocalResolve(resolvedCombine , inList, outList, folderName)
 
-                Gnew.bipartiteLocalResolve(resolvedCombine , inList, outList)
-
-            
-        #Gnew.bipartiteResolve(biResolvedCombineList)
+        
+        #json_data = open(folderName + "hackBRResolveList.json", 'r')
+        #dataItem = json.load(json_data)
+        #Gnew.bipartiteResolve(dataItem)
+        
+        ### end kkdebug 
         Gnew.condense()
 
         with open(folderName + "biResolvedCombineList.json", 'w') as f:
             json.dump(biResolvedCombineList, f)    
+
+
+        with open(folderName + "abunAnalysisList.json", 'w') as f:
+            json.dump(abunAnalysisList, f)    
+
+        #assert(1==2)
+
 
         return Gnew
 
@@ -1162,12 +1201,23 @@ def filterConfidResolve(resolvedList):
         if len(tmpList) >= conThres:
             newResolvedList.append(key)
 
-    #noConflict = resolveConflict(abunHouseKeeper.getDistinct(resolvedList))
-    #newResolvedList = abunHouseKeeper.getDistinct(newResolvedList + noConflict)
+    if False:
+        noConflict = resolveConflict(abunHouseKeeper.getDistinct(resolvedList))
+        noConflict = abunHouseKeeper.getDistinct(noConflict)
+        newResolvedList = abunHouseKeeper.getDistinct(newResolvedList)
+        newResolvedList = abunHouseKeeper.getDistinct(intersect(newResolvedList , noConflict))
 
     return newResolvedList
 
-
+def intersect(a, b):
+    c = a +b 
+    c.sort()
+    returnList = []
+    for i in range(len(c)-1):
+        if c[i] == c[i+1]:
+            returnList.append(c[i])
+            
+    return returnList 
 
 def resolveConflict(combinedList):
     combinedDic = {}

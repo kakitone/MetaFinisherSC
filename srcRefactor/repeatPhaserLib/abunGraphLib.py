@@ -6,7 +6,7 @@ import abunHouseKeeper
 from finisherSCCoreLib import IORobot
 from finisherSCCoreLib import graphLib
 from finisherSCCoreLib import alignerRobot
-
+import json
 
 class seqGraphNodeWt(graphLib.seqGraphNode):
     def __init__(self, nodeIndex):
@@ -186,10 +186,14 @@ class seqGraphDynamic(graphLib.seqGraph):
         return canReach
     
     
-    def condenseEdgeRemove(self, G_ContigRead):
+    def condenseEdgeRemove(self, G_ContigRead, folderName, mummerLink, contigFilename):
         print "condenseEdgeRemove"
         thresPass = 100
+        thresForStrangeCut = 5000
+        ### kkdebug
 
+        toRemoveList = []
+        
         for eachnode in self.graphNodesList:
             if len(eachnode.nodeIndexList) > 0:
                 if len(eachnode.listOfNextNodes) ==1  :
@@ -198,20 +202,50 @@ class seqGraphDynamic(graphLib.seqGraph):
                     if len(nextNode.listOfPrevNodes) == 1 : 
                         currentName = eachnode.nodeIndex
                         nextName =  nextNode.nodeIndex
-                        print "Remove", currentName, nextName
-                        contigReadPaths = findAllPathK(currentName,nextName, G_ContigRead, 3)
-                        ctr = 0
+
+                        contigReadPaths = findAllPathK(currentName,nextName, G_ContigRead, 5)
+
+                        cName =  abunHouseKeeper.parseIDToName(currentName,'C',0)
+                        nName =  abunHouseKeeper.parseIDToName(nextName,'C',0)
+
+                        noGoNext = self.readInJSON(folderName, "noGoNext.json")
+                        noGoPrev = self.readInJSON(folderName, "noGoPrev.json")
+
+                        overlap = [-1, -1]
+                        ctr = 0 
+
                         for eachpath in contigReadPaths:
                             if len(eachpath) > 2: 
                                 ctr = ctr + 1 
-                                print eachpath
+                                
+                            elif len(eachpath) == 2:     
+                                
+                                contigName = cName
+                                leftSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
 
-                        print "ctr", ctr
-                        if ctr <= thresPass:
+                                contigName = nName
+                                rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
+                                
+                                overlap = IORobot.align(leftSeg, rightSeg, folderName, mummerLink)
+
+
+                        if ctr <= thresPass and  (cName in noGoNext or nName in noGoPrev or overlap[0] > thresForStrangeCut ):
+                    
                             self.removeEdge(currentName, nextName)
+                            toRemoveList.append([currentName, nextName])
+
+
+        ### kkdebug
+        #with open( "dataFolder/toRemoveList.json", 'w') as f:
+        #    json.dump(toRemoveList, f)    
 
         self.findAdjList()
-            
+
+    def readInJSON(self, folderName, filename):
+
+        json_data = open(folderName + filename, 'r')
+        dataItem = json.load(json_data)
+        return dataItem
     
     def transitiveReduction(self,folderName, mummerPath, contigFile, readFile, G_ContigRead):
         for i in range(self.N1):
@@ -276,7 +310,10 @@ class seqGraphDynamic(graphLib.seqGraph):
             self.insertEdge(u,v,1997)
     
 
-    def bipartiteLocalResolve(self, resolvedList, inList, outList):
+    def bipartiteLocalResolve(self, resolvedList, inList, outList, folderName):
+
+        #noGoNext = self.readInJSON(folderName, "noGoNext.json")
+        #noGoPrev = self.readInJSON(folderName, "noGoPrev.json")
 
         for u in inList:
             self.clearOut(u/2)
@@ -286,7 +323,10 @@ class seqGraphDynamic(graphLib.seqGraph):
 
         for e in resolvedList:
             u, v =e[0], e[-1]
+            cName =  abunHouseKeeper.parseIDToName(u,'C',0)
+            nName =  abunHouseKeeper.parseIDToName(v,'C',0)
 
+            #if not cName in noGoNext and not nName in noGoPrev:  
             self.insertEdge(u,v,1997)
 
 

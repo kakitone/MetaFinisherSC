@@ -89,7 +89,7 @@ def checkingPath(folderName, mummerLink, isFinisherSC = True):
             pathExists = False
             print "Not exists : " + newMummerLink
         
-        if not os.path.exists(newFolderName + "contigs.fasta"):
+        if not os.path.exists(newFolderName + "contigs.fasta") and not os.path.exists(newFolderName + "mFixed.fasta") :
             pathExists = False
             print "Not exists : " + newFolderName + "contigs.fasta"
         

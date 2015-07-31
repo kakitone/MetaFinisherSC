@@ -3,9 +3,9 @@
 This tool is for users to upgrade their metagenomics assemblies using long reads. This includes fixing mis-assemblies and scaffolding/gap-filling. If you encounter any issues, please contact me at kklam@eecs.berkeley.edu. My name is Ka-Kit Lam. 
 
 
-### Only long reads and contigs formed from long reads (MetaFinisherSC-LongRead) ###
+### Long reads and contigs formed from short/long reads (MetaFinisherSC) ###
 
-Assume you have your long reads (LR.fasta) and contigs formed from long reads (LC.fasta). 
+Assume you have your long reads (LR.fasta) and contigs formed from short/long reads (LC.fasta). 
 
 The final output is **abun.fasta** after running through the M-Fixer(mis-assembly fixing) and A-Splitter(join contigs based on abundance and overlap information). 
 

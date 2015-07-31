@@ -3,7 +3,7 @@
 This tool is for users to upgrade their metagenomics assemblies using long reads. This includes fixing mis-assemblies and scaffolding/gap-filling. If you encounter any issues, please contact me at kklam@eecs.berkeley.edu. My name is Ka-Kit Lam. 
 
 
-### Long reads and contigs formed from short/long reads (MetaFinisherSC) ###
+### Commands to run the tool ###
 
 Assume you have your long reads (LR.fasta) and contigs formed from short/long reads (LC.fasta). 
 

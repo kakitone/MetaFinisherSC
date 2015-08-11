@@ -19,6 +19,14 @@ In order to do that, here are the steps.
 
         python -m srcRefactor.repeatPhaserLib.aSplitter destinedFolder mummerPath
 
+	
+Sometimes, if the names of raw reads and contigs consists of special characters/formats, MetaFinisherSC/MUMmer may not parse them correctly. In that case, you want to have a quick renaming of the names of contigs/reads in LC.fasta or LR.fasta using the following command. 
+
+        perl -pe 's/>[^\$]*$/">Seg" . ++$n ."\n"/ge' LR.fasta > newLR.fasta
+        cp newLR.fasta LR.fasta
+        perl -pe 's/>[^\$]*$/">Seg" . ++$n ."\n"/ge' LC.fasta > newLC.fasta
+        cp newLC.fasta LC.fasta
+
 ### Example ###
 Below is a step by step example on running MetaFinisherSC on the testset provided. In this example, there are two misassembled contigs and we will fix the misassemblies and join them back correctly. The reads are synthetic reads extracted from two synthetic species of different abundances(20X and 50X respectively). Both species share a common segment of length 12000 bp and that the readlength is 6000bp.  
 

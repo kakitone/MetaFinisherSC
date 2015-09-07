@@ -694,7 +694,6 @@ def xNodeResolving(folderName, contigReadGraph):
 
     return resolvedList, mapDummyToRealDic
 
-
 def abunSplitWithXResolve(folderName, mummerLink, myCountDic,contigReadGraph,  contigFilename,readsetFilename ):
     N1 = len(myCountDic)*2
     print "N1", N1
@@ -806,8 +805,6 @@ def abunSplitWithXResolve(folderName, mummerLink, myCountDic,contigReadGraph,  c
         
         IORobot.extractGraphToContigs(G, folderName, mummerLink, "abun.fasta", "tmpWithDummy.fasta", gapContentLookUpDic, mapDummyToRealDic)
 
-
-
 def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFilename,contigFilename ):
 
     ### Transitive reduction and remove double pointers
@@ -888,7 +885,6 @@ def graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFil
     
     return Gnew
 
-
 def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic):
 
     if abunHouseKeeper.abunGlobalSplitParameterRobot.runBResolve:
@@ -922,8 +918,6 @@ def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic):
 
                 if abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpperB > 0:
                     abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpper = abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpperB
-
-
 
                 if not abunHouseKeeper.abunGlobalSplitParameterRobot.toRunAggB: 
                     resolvedList = determindMatch(inList, outList, myCountDic, folderName,contigReadGraph, N1)
@@ -976,7 +970,6 @@ def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic):
     else:
         return Gnew
             
-
 def XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1):
 
     if abunHouseKeeper.abunGlobalSplitParameterRobot.runXResolve:
@@ -1051,7 +1044,6 @@ def formGapLookUp(folderName,contigReadGraph, mummerLink,contigFilename,readsetF
     with open(folderName + "gapContentLookUpDic.json", 'w') as f:
         json.dump(gapContentLookUpDic, f)
 
-
 def readContigForAbunSplit(folderName,mummerLink,  contigFilename, readsetFilename, N1, contigReadGraph):
 
     json_data = open(folderName + "mapDummyToRealDic.json", 'r')
@@ -1114,11 +1106,15 @@ def abunSplitAdvResolve(folderName, mummerLink, myCountDic,contigReadGraph,  con
     N1 = len(lenDic)
 
     Gnew = graphSurgery(myCountDic, folderName, contigReadGraph, mummerLink, readsetFilename, contigFilename)
+    Gnew.logEdges(folderName, "graphsurgery")
+    
     Gnew = BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic)
+    Gnew.logEdges(folderName, "BResolution")
+    
     XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1 )
+    Gnew.logEdges(folderName, "XResolution")
 
     readContigForAbunSplit(folderName,mummerLink,  contigFilename, readsetFilename, N1,contigReadGraph)
-
 
 def xNodeAdvResolving(Gnew, GContigRead, folderName, myCountDic, lenDic):
     N1 = len(myCountDic)*2
@@ -1167,7 +1163,6 @@ def xNodeAdvResolving(Gnew, GContigRead, folderName, myCountDic, lenDic):
                     xResolvedList[nodeI].append([eachIn[0], matchedOut ])
                     
     return xResolvedList
-
 
 def formBRReolve(folderName, oldin, oldout, G, Grev, needTransform, N1):
     inList, outList = [],[]
@@ -1312,8 +1307,6 @@ def formConfirmReadResolve(folderName, inList, outList, G, Grev,  N1):
 
     return resolvedList
 
-
-
 def resolveConflictX(listA, listB):
     resolvedList = [[] for i in range(len(listA))]
     print "len(listA), len(listB)", len(listA), len(listB)
@@ -1324,7 +1317,6 @@ def resolveConflictX(listA, listB):
         resolvedList[i] = tmpResolved 
 
     return resolvedList
-
 
 def xNodeBrResolving(Gnew, G, Grev, folderName, N1):
     #brResolvedListforX = []
@@ -1345,41 +1337,4 @@ def xNodeBrResolving(Gnew, G, Grev, folderName, N1):
         xResolvedList[nodeI] = formBRReolve(folderName, inList, outList, G, Grev, False, N1)
 
     return xResolvedList 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    
 

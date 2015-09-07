@@ -7,6 +7,8 @@ from itertools import groupby
 from operator import itemgetter
 import merger
 import os 
+import json
+
 
 def fixAdaptorSkip(folderName, mummerLink, inputFileName, outputFileName):
     print "fixAdaptorSkip"
@@ -93,12 +95,21 @@ def fixAdaptorSkip(folderName, mummerLink, inputFileName, outputFileName):
                             
     IORobot.writeSegOut(returnContigList, folderName, "clearedAdaptor.fasta")
     
+    ### log data
+    adaptorSkippedLogDic = {}
+    for eachitem in breakDic:
+        adaptorSkippedLogDic[eachitem] = [0, breakDic[1], breakDic[-1]]
+        
+    with open(folderName + 'adaptorSkippedLogDic.json', 'w') as f:
+        json.dump(adaptorSkippedLogDic, f)
+    ###
     '''
     os.system("cp " + folderName + "contigs.fasta " + folderName + "contigsbackup.fasta")
     os.system("cp " + folderName + "clearedAdaptor_"+inputFileName + " " + \
               folderName + "contigs.fasta")
     
     '''
+
     if True:
         nonRedundantResolver.removeRedundantWithFile(folderName , mummerLink, "clearedAdaptor", "clearedAdaptorRedundant",outputFileName )
 

@@ -17,7 +17,6 @@ parser.add_argument('-f', '--fast', help= 'Fast aligns contigs (input is True)',
 parser.add_argument('-par', '--parallel', help= 'Fast aligns contigs (input is maximum number of threads)', required=False)
 parser.add_argument('-l', '--large', help= 'Large number of contigs/large size of contigs (input is True)', required=False)
 
-
 parser.add_argument('-rp', '--replace', help= 'Input files to aSplitter(e.g. noEmbed.fasta, improved.fasta, improved2.fasta or improved3.fasta)', required=False)
 parser.add_argument('-ar', '--avoidrefine', help= 'Avoid refined abundance estimation (input is True)', required=False)
 parser.add_argument('-rs', '--readsearch', help= 'Number of linking reads across a gap  (input is number of such linking reads/2)', required=False)

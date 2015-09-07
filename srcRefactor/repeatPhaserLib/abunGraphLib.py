@@ -185,7 +185,34 @@ class seqGraphDynamic(graphLib.seqGraph):
         self.clearVisitStatus()
         return canReach
     
-    
+    def logEdges(self, folderName, stagename):
+        print "Logging edges"
+        logList = []
+        
+        if stagename == "XResolution":
+            mapDummyToRealDic =self.readInJSON(folderName, "mapDummyToRealDic.json")
+        else:
+            mapDummyToRealDic = {}
+
+        for eachnode in self.graphNodesList:
+            tmpNodeIndexList = []
+            for kk in eachnode.nodeIndexList:
+                if kk >= self.N1:
+                    tmpNodeIndexList += mapDummyToRealDic[str(kk-self.N1)][1]
+                else:
+                    tmpNodeIndexList += [kk]
+
+            if len(tmpNodeIndexList) >= 2:
+                for i in range(len(tmpNodeIndexList)-1):
+                    currentName = tmpNodeIndexList[i]
+                    nextName =  tmpNodeIndexList[i+1]
+                    cName =  abunHouseKeeper.parseIDToName(currentName,'C',0)
+                    nName =  abunHouseKeeper.parseIDToName(nextName,'C',0)
+                    logList.append([cName, nName])
+
+        with open( folderName + stagename + ".json", 'w') as f:
+            json.dump(logList, f)    
+
     def condenseEdgeRemove(self, G_ContigRead, folderName, mummerLink, contigFilename):
         print "condenseEdgeRemove"
         thresPass = 100
@@ -377,8 +404,6 @@ class seqGraphDynamic(graphLib.seqGraph):
                     self.xResolvedSimplifiedList.append([inNode, i])
                     self.xResolvedSimplifiedList.append([i, outNode])
                 else:
-
-
                     self.graphNodesList.append(graphLib.seqGraphNode(self.N1+self.runningCtr))
                     
                     if False:
@@ -396,8 +421,6 @@ class seqGraphDynamic(graphLib.seqGraph):
                         self.removeEdge(inNode,i )
                         self.removeEdge(i, outNode)
 
-
-
                     self.insertEdge(inNode, self.N1 + self.runningCtr, 1997)
                     self.insertEdge(self.N1 + self.runningCtr, outNode, 1997)
 
@@ -405,11 +428,7 @@ class seqGraphDynamic(graphLib.seqGraph):
                     
                     self.xResolvedSimplifiedList.append([inNode, self.N1 + self.runningCtr])
                     self.xResolvedSimplifiedList.append([self.N1 + self.runningCtr, outNode])
-                    
-
-                    
                     self.runningCtr = self.runningCtr + 1
-                
                 
 
 def findMyComp(u):

@@ -76,7 +76,7 @@ class abunSplitParameterRobot():
                 canLoad = False
         return canLoad
 
-  
+
 abunGlobalSplitParameterRobot = abunSplitParameterRobot()
 
 
@@ -118,8 +118,6 @@ def parseEdgeNameToID(name, mytype):
         
     return id 
 
-
-
 def parseIDToName(id, mytype, numDoubleContigs):
 
     if mytype == 'C':
@@ -143,7 +141,6 @@ def getDistinct(myList):
         newList.append(key)
     
     return newList
-
 
 def filterData(dataList, lenDic):
     newDataList = []

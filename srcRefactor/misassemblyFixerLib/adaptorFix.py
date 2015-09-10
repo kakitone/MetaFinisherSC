@@ -98,7 +98,7 @@ def fixAdaptorSkip(folderName, mummerLink, inputFileName, outputFileName):
     ### log data
     adaptorSkippedLogDic = {}
     for eachitem in breakDic:
-        adaptorSkippedLogDic[eachitem] = [0, breakDic[1], breakDic[-1]]
+        adaptorSkippedLogDic[eachitem] = [0, breakDic[eachitem][1], breakDic[eachitem][-1]]
         
     with open(folderName + 'adaptorSkippedLogDic.json', 'w') as f:
         json.dump(adaptorSkippedLogDic, f)

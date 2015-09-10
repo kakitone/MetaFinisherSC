@@ -36,3 +36,25 @@ nohup python -m srcRefactor.evaluator --option evaluate \
 --paraASplitterFileName option.json \
 --outputFilename /data/kakitone/May07-2015/workingMetaFinisherSC/results.csv &
 
+4) Data analysis
+python -m srcRefactor.evalmfixer
+python -m srcRefactor.misassemblyFixerLib.mergerHelper
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -31,7 +31,7 @@ def GTFinder(folderName,inputfile):
 	# "Format of the dataList :  1      765  |    11596    10822  |      765      775  |    84.25  |        scf7180000000702    ref_NC_001133_"
 
 	### Finding the alignment 
-	if True:
+	if False:
 		alignerRobot.useMummerAlign("/usr/bin/", folderName, "groundTruthMatchFixer"+inputfile, inputfile, "reference.fasta", False, "", False)
 	
 	dataList = alignerRobot.extractMumData(folderName, "groundTruthMatchFixer" +inputfile+ "Out")
@@ -70,9 +70,7 @@ def rangeParser(tmpList, contigLen):
 		else:
 			if y < x - thres:
 				rangeList.append([y,x])
-		
 		x = z
-
 
 	return rangeList
 
@@ -164,8 +162,8 @@ def CalculatePreRecall(folderName, filename, bkPtList, carryover=0):
 def mainFlow():
 
 	print "MFixer analysis."
-	folderName = "dataFolder0/"
-	folderName = os.path.abspath(os.path.dirname(sys.argv[0])) + "/" +folderName
+	folderName = "dataFolder/"
+	#folderName = os.path.abspath(os.path.dirname(sys.argv[0])) + "/" +folderName
 
 
 	bkPtList = ["adaptorSkippedLogDic.json"]
@@ -174,7 +172,7 @@ def mainFlow():
 
 
 	GTFinder(folderName,"LC_filtered.fasta")
-	bkPtList = ["blkDic.json",  "repeatDic.json", "modifiedOutliners.json" ] 
+	bkPtList = ["blkDic.json",  "repeatDic.json", "modifiedOutliners.json" , "blkDicNew.json"] 
 	indComponentTestListMFixer2 = CalculatePreRecall(folderName, "LC_filtered.fasta", bkPtList, indComponentTestListMFixer[0][-2])
 
 	combined = indComponentTestListMFixer + indComponentTestListMFixer2
@@ -184,9 +182,9 @@ def mainFlow():
 	
 def unitTesting():
 	print "unittesting"
-	folderName = "dataFolder0/"
-	if False:
-		GTFinder(folderName)
+	folderName = "dataFolder/"
+	if True:
+		GTFinder(folderName, "LC.fasta")
 	if False:
 		BKPtMarker(folderName)
 	if False:

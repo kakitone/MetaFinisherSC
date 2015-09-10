@@ -9,7 +9,7 @@ mergerGlobalLCReads = "SR"
 
 class fixerRobot:
     def __init__(self):
-        print "fixerRobot"
+        #print "fixerRobot"
         self.toRunAdaptor = True
         self.toRunNoEmbedEnd = True
         self.toRunAggressive = False
@@ -556,8 +556,6 @@ def removeNeighbor(oldList, gapBtwBk ):
             oldItm = eachitem[1] 
         
     return modifiedList 
-
-
     
 def findPartner(seedList, oldList, gapLen):
     partnerList = []
@@ -727,7 +725,6 @@ def breakSC(folderName, mummerLink):
             brokenContigList = brokenContigList + [contigList[eachitem]]
             
     IORobot.writeSegOut(brokenContigList, folderName, "SC_n.fasta")
-     
 
 def fixSCMisassembly(folderName , mummerLink):
     print "fixSCMisassembly"
@@ -750,7 +747,6 @@ Only Long reads and long contigs case:
 
 def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
 
-    
     if not mergerGlobalFixerRobot.tuneParaOnly:
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, [["self"+inputName, inputName+".fasta", inputName+".fasta", ""]], houseKeeper.globalParallel )
         

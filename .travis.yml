@@ -8,3 +8,5 @@ install:
   - tar -zxvf /tmp/mummer.tar.gz -C /tmp/
   - make install -C /tmp/MUMmer3.23/
   
+script: 
+  - python onlineTest.py 

@@ -1,13 +1,14 @@
 
 import unittest
 import os
-import IORobot
+from srcRefactor.repeatPhaserLib.finisherSCCoreLib import IORobot
 
 
 class IsOddTests(unittest.TestCase):
     
     def setUp(self):
         print "Init : Copying files : "
+        os.system("python ~/experimentBench/test.py")
         
         self.testingFolder = "unitTestFolder"
         self.mummerPath = "/tmp/MUMmer3.23/"
@@ -31,8 +32,8 @@ class IsOddTests(unittest.TestCase):
             os.system("cp "+ self.sourceFolder + eachitem + " " +self.testingFolder)
         
         os.system("python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 "+ self.testingFolder + " "+ self.mummerPath)
-		os.system("python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 "+ self.testingFolder + " "+ self.mummerPath)
-		        
+        os.system("python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 "+ self.testingFolder + " "+ self.mummerPath)
+
         lenDic = IORobot.obtainLength(self.testingFolder, "/abun.fasta")
         print lenDic
         assert(len(lenDic) == ctexpected)

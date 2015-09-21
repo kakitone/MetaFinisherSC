@@ -80,7 +80,7 @@ def groupCTest(x):
 
 	count = 0
 	while (np.sum(u) != len(u)):
-		print count
+		#print count
 		count += 1
 		gp = findUpdateGrouping(p, x)
 		#print len(gp), len(x)

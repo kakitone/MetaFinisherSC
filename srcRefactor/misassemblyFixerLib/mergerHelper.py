@@ -5,13 +5,14 @@ from ..repeatPhaserLib.finisherSCCoreLib import houseKeeper
 import bisect
 import adaptorFix
 import groupctest
-import intervalunion
+
 
 from operator import itemgetter
 from itertools import groupby
 import json
 import numpy as np
-
+import argparse
+import  intervalunion
 
 def repeatFinder(folderName, inputName):
 	'''
@@ -22,8 +23,10 @@ def repeatFinder(folderName, inputName):
 	dataList = alignerRobot.transformCoor(dataList)
 	lenDic = IORobot.obtainLength(folderName, inputName+'.fasta')
 
-	matchThres = 10000
-	nonMatchThres = 500
+	matchThres = 8000
+	nonMatchThres = 2
+
+	separationThres = 5000
 	
 	newDataList= []
 
@@ -34,23 +37,48 @@ def repeatFinder(folderName, inputName):
 
 		if name1!= name2   and  ( min(lenDic[name1] - end1, lenDic[name2] - end2 ) > nonMatchThres or min(start1, start2) > nonMatchThres ) and matchLen1> matchThres:
 			newDataList.append(eachitem)
+		elif name1 == name2 and abs(start1 - start2) > separationThres  and abs(end1 - end2 ) > separationThres and matchLen1 > matchThres:
+			#print eachitem
+			newDataList.append(eachitem)
 
-	print len(newDataList), newDataList[0]
+	#print len(newDataList), newDataList[0]
 	# 351 [1, 17852, 1, 17842, 17852, 17842, 98.11, 'Segkk0', 'Segkk128']
+	# assert(False)
 	newDataList.sort(key = itemgetter(-2))
+
+	if False:
+		for eachitem in newDataList:
+			if eachitem[4] > 40000:
+				print eachitem	, lenDic[eachitem[-2]], lenDic[eachitem[-1]]
+
 
 	repeatIntervalDic = {}
 
+	count =0 
 	for key, items in groupby(newDataList, itemgetter(-2)):
 		
 		listOfIntervals = []
 		for eachsub in items:
 			listOfIntervals.append([eachsub[0], eachsub[1]])
 
-		repeatIntervalDic[key] = intervalunion.intervalUnion(listOfIntervals) 
 
+		if True:
+			thres = 30
+			B = intervalunion.intervalCover(listOfIntervals, thres)
+			rangeList = intervalunion.reportMisAssemblyIntervals2(B, lenDic[key], thres, key)
+			#print "listOfIntervals", listOfIntervals
+			#print " B : ", B
+			#print " rangeList :", rangeList
+			#print "union : ", intervalunion.intervalUnion(listOfIntervals) 
+			count += len(rangeList)
+			if len(rangeList) > 0:
+				repeatIntervalDic[key] = rangeList
+				
+		if False:
+			repeatIntervalDic[key] = intervalunion.intervalUnion(listOfIntervals) 
+
+	print "Count", count
 	return repeatIntervalDic
-
 
 def groupCTest(folderName, repeatIntervalDic):
 	'''
@@ -68,32 +96,36 @@ def groupCTest(folderName, repeatIntervalDic):
 	pDic = {}
 	for eachitem in xDic:
 		if  len(xDic[eachitem]) > 1:
-			#print xDic[eachitem]
 			pDic[eachitem] = groupctest.predictDecisionBoundary(xDic[eachitem], "groupCTest")
-			print xDic[eachitem], pDic[eachitem]
-			
+			#pDic[eachitem] = [1 for i in range(len(xDic[eachitem])-1)]
+
 	blkDic = {}
 	for eachitem in pDic:
 		blkDic[eachitem] = formBlkDic(pDic[eachitem], locDic[eachitem], len(coveragePerContigs[eachitem]))
 
 	return blkDic
 
-
-def formatIntervalAndFilter(repeatInterval, coverageData):
+def formatIntervalAndFilter2(repeatInterval, coverageData):
 	tmpList = []
-	initThres = 500
-	lenThres = 1000
+	initThres = 2
+	lenThres = 1
+	largestRange = 50000
 
 	start, end = initThres, repeatInterval[0][0]
-	# Potential hacks cut head/end too
-
+	end = min ( start + largestRange, end)
 	tmpList.append([np.sum(coverageData[start:end]), start, end ])
 
-	for i in range(0, len(repeatInterval)-1):
-		start, end = repeatInterval[i][1], repeatInterval[i+1][0]
+	for i in range(1, len(repeatInterval)):
+		start, end = repeatInterval[i-1][1], repeatInterval[i][0]
+		end = min ( start + largestRange, end)
+		tmpList.append([np.sum(coverageData[start:end]), start, end ])
+
+		start, end = repeatInterval[i][0], repeatInterval[i][1]
+		end = min ( start + largestRange, end)
 		tmpList.append([np.sum(coverageData[start:end]), start, end ])
 
 	start, end = repeatInterval[-1][1], len(coverageData) - initThres
+	end = min ( start + largestRange, end) 
 	tmpList.append([np.sum(coverageData[start:end]), start, end ])
 
 	dataList, locList = [], []
@@ -106,38 +138,53 @@ def formatIntervalAndFilter(repeatInterval, coverageData):
 
 	return dataList, locList 
 
+def formatIntervalAndFilter(repeatInterval, coverageData):
+	dataList, locList = [], []
+	
+	initThres = 2
+	lenThres = 1
+	largestRange = 50000
+
+	start, end = initThres, repeatInterval[0][0]
+	if end - start > lenThres:
+		locList.append([start, end])
+		end = min ( start + largestRange, end)
+		dataList.append([np.sum(coverageData[start:end]),  end -start ])
+
+	for i in range(0, len(repeatInterval)-1):
+		start, end = repeatInterval[i][1], repeatInterval[i+1][0]
+		if end - start > lenThres:
+			locList.append([start, end])
+			end = min ( start + largestRange, end)
+			dataList.append([np.sum(coverageData[start:end]),  end -start ])
+
+	start, end = repeatInterval[-1][1], len(coverageData) - initThres
+	if end - start > lenThres:
+		locList.append([start, end])
+		end = min ( start + largestRange, end)
+		dataList.append([np.sum(coverageData[start:end]),  end -start ])
+
+	return dataList, locList 
 
 def formBlkDic(p, loc, contigLen):
 	blkList = []
 	blkList.append(0)
+
 	for i in range(len(p)):
 		if p[i] == 1:
-			blkList.append(loc[i][0])
+			blkList.append(loc[i][1])
 
 	blkList.append(contigLen)
 	return blkList
 
-
-def unitTest():
-	folderName = "dataFolder/"
+def mainFlow(folderName):
 	repeatIntervalDic = repeatFinder(folderName, "LC_filtered")
-	if False:
-		for eachitem in repeatIntervalDic:
-			print repeatIntervalDic[eachitem]
-
 	blkDicNew = groupCTest(folderName, repeatIntervalDic)
-
 	with open(folderName + "blkDicNew.json", 'w') as outfile:
 		json.dump(blkDicNew, outfile)
 
-unitTest()
+parser = argparse.ArgumentParser(description='evalmfixer')
+parser.add_argument('folderName')
+args = vars(parser.parse_args())
 
-
-
-
-
-
-
-
-
-
+mainFlow(args['folderName'])

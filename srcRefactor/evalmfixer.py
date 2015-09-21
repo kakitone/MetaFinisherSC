@@ -8,6 +8,9 @@ from srcRefactor.repeatPhaserLib.finisherSCCoreLib \
 from operator import itemgetter
 from itertools import groupby
 import os ,sys
+import argparse
+import srcRefactor.misassemblyFixerLib.intervalunion as intervalunion
+
 
 '''
 Goal: Calculate the precision/recall for MFixer
@@ -37,7 +40,7 @@ def GTFinder(folderName,inputfile):
 	dataList = alignerRobot.extractMumData(folderName, "groundTruthMatchFixer" +inputfile+ "Out")
 
 	lenDic = IORobot.obtainLength(folderName, inputfile)
-
+	#print len(dataList)
 	### Parsing the alignment 
 	GTMap = []
 	dataList.sort(key=itemgetter(-2))
@@ -47,7 +50,11 @@ def GTFinder(folderName,inputfile):
 		tmpList = list(items)
 		tmpList.sort(key = itemgetter(0))
 		#print len(tmpList)
-		rangeList= rangeParser(tmpList, lenDic[key])
+		#rangeList= rangeParser(tmpList, lenDic[key])
+		thres = 100
+		B = intervalunion.intervalCover(tmpList, thres)
+		rangeList = intervalunion.reportMisAssemblyIntervals(B, lenDic[key], thres)
+
 		GTMap.append([contigName, rangeList])
 
 
@@ -70,7 +77,15 @@ def rangeParser(tmpList, contigLen):
 		else:
 			if y < x - thres:
 				rangeList.append([y,x])
+
+		if x == z:
+			#print "x, y, z, contigLen : ", x, y, z, contigLen, tmpList
+			#assert(x!=z)
+			rangeList.append([max(1,x-thres), min(x+thres, contigLen-1)])
+			break
+
 		x = z
+
 
 	return rangeList
 
@@ -135,11 +150,13 @@ def CalculatePreRecall(folderName, filename, bkPtList, carryover=0):
 			for eachbkpt in eachitem[1][1:-1]:
 				
 				ck = False
-				for ckrange in GTDic[contigName]:
-					if ckrange[0] <= eachbkpt <= ckrange[1]:
-						ck = True
-						GTDic[contigName].remove(ckrange)
-						break
+				if contigName in GTDic:
+					for ckrange in GTDic[contigName]:
+						if ckrange[0] <= eachbkpt <= ckrange[1]:
+							ck = True
+							GTDic[contigName].remove(ckrange)
+							break
+
 
 				if ck:	
 					TP += 1 
@@ -153,18 +170,21 @@ def CalculatePreRecall(folderName, filename, bkPtList, carryover=0):
 
 		recall = TP*1.0/T
 
-		print "i, precision, recall, TP_num, FP_num  : %d \t %f \t %f \t %d \t %d "  % (i, precision, recall, TP ,FP)  
+		if recall != 0 :
+			f1score = recall*precision*2/(precision + recall)
+		else:
+			f1score = 0
+
+		print "i, precision, recall, TP_num, FP_num  : %d \t %f \t %f \t %d \t %d \t %f "  % (i, precision, recall, TP ,FP, f1score)  
 		indComponentTestListMFixer.append([precision, recall, TP, FP, bkPtList[i] ])
 
 
 	return indComponentTestListMFixer
 	
-def mainFlow():
+def mainFlow(folderName):
 
 	print "MFixer analysis."
-	folderName = "dataFolder/"
 	#folderName = os.path.abspath(os.path.dirname(sys.argv[0])) + "/" +folderName
-
 
 	bkPtList = ["adaptorSkippedLogDic.json"]
 	GTFinder(folderName,"LC.fasta")
@@ -190,8 +210,12 @@ def unitTesting():
 	if False:
 		CalculatePreRecall(folderName)
 
-#unitTesting()
-mainFlow()
+parser = argparse.ArgumentParser(description='evalmfixer')
+parser.add_argument('folderName')
+args = vars(parser.parse_args())
+
+folderName = args['folderName']
+mainFlow(folderName)
 
 
 

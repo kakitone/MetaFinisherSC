@@ -24,7 +24,6 @@ if args['parallel'] != None:
 else:
     houseKeeper.globalParallel = 20
 
-
 if args['LCReads'] == None:
     merger.mergerGlobalLCReads = "LR"
 elif args['LCReads'] == "LR":

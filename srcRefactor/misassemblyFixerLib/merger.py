@@ -14,7 +14,7 @@ class fixerRobot:
         self.toRunNoEmbedEnd = True
         self.toRunAggressive = False
         self.sdMult = 5
-        self.tuneParaOnly = False
+        self.tuneParaOnly = True
 
 
     def loadData(self, initial_data):
@@ -121,7 +121,7 @@ def completelyEmbedSR2TR(eachsub, lenDic) :
             return True
         else:
             return False
-        
+
 
 def assignCoverage(dataitem, coveragePerContigsDic):
     contigName = dataitem[-2]
@@ -775,14 +775,18 @@ def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
         if not mergerGlobalFixerRobot.tuneParaOnly:
             alignSR2LC(folderName, mummerLink, inputName)
 
-        breakLC(folderName, inputName)
-        blkDic = getBreakPointFromDataList(folderName, newDataList, inputName)
+        #breakLC(folderName, inputName)
+        #blkDic = getBreakPointFromDataList(folderName, newDataList, inputName)
+        json_data = open(folderName + "blkDicNew.json", 'r')
+        blkDic = json.load(json_data)
+
     else:
         blkDic = breakPtGettingHack2(folderName, newDataList, inputName)
+        
 
-
-    with open(folderName + "blkDic.json", 'w') as outfile:
-        json.dump(blkDic, outfile)
+    if False:
+        with open(folderName + "blkDic.json", 'w') as outfile:
+            json.dump(blkDic, outfile)
 
     LCList = IORobot.loadContigsFromFile(folderName, inputName+".fasta")
 

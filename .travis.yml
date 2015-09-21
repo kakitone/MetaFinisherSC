@@ -1,0 +1,15 @@
+language: python
+python:
+  - "2.7"
+  - "2.6"
+# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+install: 
+  - wget http://sourceforge.net/projects/mummer/files/mummer/3.23/MUMmer3.23.tar.gz/download -O /tmp/mummer.tar.gz
+  - tar -zxvf /tmp/mummer.tar.gz -C /tmp/
+  - make install -C /tmp/MUMmer3.23/
+  - wget -O /tmp/testData.zip http://www.eecs.berkeley.edu/~kakitone/testData.zip
+  - mkdir /tmp/syntheticrun
+  - unzip /tmp/testData.zip LR.fasta reference.fasta LC.fasta -d /tmp/syntheticrun
+  
+script: 
+  - python onlineTest.py 

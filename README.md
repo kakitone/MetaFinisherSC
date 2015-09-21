@@ -101,4 +101,10 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
         | 2500001  2512000  |  2500001  2512000  |    12000    12000  |   100.00  | Segkk1	Segkk0
         |       1  5000000  |        1  5000000  |  5000000  5000000  |   100.00  | Segkk1	Segkk1
         | 2500001  2512000  |  2500001  2512000  |    12000    12000  |   100.00  | Segkk0	Segkk1
+     
+     
+##Current build status##
+It is an indicator on the current built powered by Travis-CI. If you issue a pull request, Travis-CI will evaluate your suggestion by automatically running the code on the default test case. 
+
+![alt text](https://travis-ci.org/kakitone/MetaFinisherSC.svg?branch=master "Current build status")
 

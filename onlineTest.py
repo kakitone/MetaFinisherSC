@@ -31,8 +31,8 @@ class IsOddTests(unittest.TestCase):
         for eachitem in self.listOfFiles:
             os.system("cp "+ self.sourceFolder + eachitem + " " +self.testingFolder)
         
-        os.system("python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 "+ self.testingFolder + " "+ self.mummerPath)
-        os.system("python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 "+ self.testingFolder + " "+ self.mummerPath)
+        os.system("python -m srcRefactor.misassemblyFixerLib.mFixer -par 4 "+ self.testingFolder + " "+ self.mummerPath)
+        os.system("python -m srcRefactor.repeatPhaserLib.aSplitter -par 4 "+ self.testingFolder + " "+ self.mummerPath)
         #os.system("python -m srcRefactor.repeatPhaserLib.aSplitter --pickup split "+ self.testingFolder + " "+ self.mummerPath)
 
 

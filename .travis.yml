@@ -10,9 +10,9 @@ install:
   - wget -O /tmp/testData.zip http://www.eecs.berkeley.edu/~kakitone/testData.zip
   - mkdir /tmp/syntheticrun
   - unzip /tmp/testData.zip LR.fasta reference.fasta LC.fasta -d /tmp/syntheticrun
-  - pip install scipy
-  - pip install scipy.stats
-  - pip install numpy
+  - travis_wait pip install scipy
+  - travis_wait pip install scipy.stats
+  - travis_wait pip install numpy
   
 script: 
   - python onlineTest.py 

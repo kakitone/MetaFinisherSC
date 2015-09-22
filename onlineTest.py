@@ -7,7 +7,7 @@ from srcRefactor.repeatPhaserLib.finisherSCCoreLib import IORobot
 class IsOddTests(unittest.TestCase):
     
     def setUp(self):
-        print "Init : Copying files : "
+        print "Init : Copying fil : "
         os.system("python ~/experimentBench/test.py")
         
         self.testingFolder = "unitTestFolder"

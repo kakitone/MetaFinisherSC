@@ -342,19 +342,20 @@ class seqGraphDynamic(graphLib.seqGraph):
         #noGoNext = self.readInJSON(folderName, "noGoNext.json")
         #noGoPrev = self.readInJSON(folderName, "noGoPrev.json")
 
-        for u in inList:
-            self.clearOut(u/2)
+        if len(resolvedList) > 0:
+            for u in inList:
+                self.clearOut(u/2)
 
-        for v in outList:
-            self.clearIn(v/2)
+            for v in outList:
+                self.clearIn(v/2)
 
-        for e in resolvedList:
-            u, v =e[0], e[-1]
-            cName =  abunHouseKeeper.parseIDToName(u,'C',0)
-            nName =  abunHouseKeeper.parseIDToName(v,'C',0)
+            for e in resolvedList:
+                u, v =e[0], e[-1]
+                cName =  abunHouseKeeper.parseIDToName(u,'C',0)
+                nName =  abunHouseKeeper.parseIDToName(v,'C',0)
 
-            #if not cName in noGoNext and not nName in noGoPrev:  
-            self.insertEdge(u,v,1997)
+                #if not cName in noGoNext and not nName in noGoPrev:  
+                self.insertEdge(u,v,1997)
 
 
     def symGraph(self):

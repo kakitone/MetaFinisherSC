@@ -8,7 +8,7 @@ class IsOddTests(unittest.TestCase):
     
     def setUp(self):
         print "Init : Copying files : "
-        os.system("python ~/experimentBench/test.py")
+        #os.system("python ~/experimentBench/test.py")
         
         self.testingFolder = "unitTestFolder"
         self.mummerPath = "/tmp/MUMmer3.23/"
@@ -33,11 +33,14 @@ class IsOddTests(unittest.TestCase):
         
         os.system("python -m srcRefactor.misassemblyFixerLib.mFixer -par 20 "+ self.testingFolder + " "+ self.mummerPath)
         os.system("python -m srcRefactor.repeatPhaserLib.aSplitter -par 20 "+ self.testingFolder + " "+ self.mummerPath)
+        #os.system("python -m srcRefactor.repeatPhaserLib.aSplitter --pickup split "+ self.testingFolder + " "+ self.mummerPath)
+
+
 
         lenDic = IORobot.obtainLength(self.testingFolder, "/abun.fasta")
         print lenDic
         assert(len(lenDic) == ctexpected)
-        os.system("rm -rf "+ self.testingFolder)
+        #os.system("rm -rf "+ self.testingFolder)
         
     def tearDown(self):
         print "Teardown : Removing used files "

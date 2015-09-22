@@ -4,6 +4,7 @@ from ..repeatPhaserLib.finisherSCCoreLib import nonRedundantResolver
 from ..repeatPhaserLib.finisherSCCoreLib import houseKeeper 
 import bisect
 import adaptorFix
+import mergerHelper
 
 mergerGlobalLCReads = "SR"
 
@@ -14,7 +15,7 @@ class fixerRobot:
         self.toRunNoEmbedEnd = True
         self.toRunAggressive = False
         self.sdMult = 5
-        self.tuneParaOnly = True
+        self.tuneParaOnly = False
 
 
     def loadData(self, initial_data):
@@ -775,16 +776,18 @@ def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
         if not mergerGlobalFixerRobot.tuneParaOnly:
             alignSR2LC(folderName, mummerLink, inputName)
 
+        repeatIntervalDic = mergerHelper.repeatFinder(folderName, "LC_filtered")
+        blkDic = mergerHelper.groupCTest(folderName, repeatIntervalDic)
         #breakLC(folderName, inputName)
         #blkDic = getBreakPointFromDataList(folderName, newDataList, inputName)
-        json_data = open(folderName + "blkDicNew.json", 'r')
-        blkDic = json.load(json_data)
+        #json_data = open(folderName + "blkDicNew.json", 'r')
+        #blkDic = json.load(json_data)
 
     else:
         blkDic = breakPtGettingHack2(folderName, newDataList, inputName)
         
 
-    if False:
+    if True:
         with open(folderName + "blkDic.json", 'w') as outfile:
             json.dump(blkDic, outfile)
 

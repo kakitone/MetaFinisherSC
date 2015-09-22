@@ -46,12 +46,6 @@ def repeatFinder(folderName, inputName):
 	# assert(False)
 	newDataList.sort(key = itemgetter(-2))
 
-	if False:
-		for eachitem in newDataList:
-			if eachitem[4] > 40000:
-				print eachitem	, lenDic[eachitem[-2]], lenDic[eachitem[-1]]
-
-
 	repeatIntervalDic = {}
 
 	count =0 
@@ -66,16 +60,10 @@ def repeatFinder(folderName, inputName):
 			thres = 30
 			B = intervalunion.intervalCover(listOfIntervals, thres)
 			rangeList = intervalunion.reportMisAssemblyIntervals2(B, lenDic[key], thres, key)
-			#print "listOfIntervals", listOfIntervals
-			#print " B : ", B
-			#print " rangeList :", rangeList
-			#print "union : ", intervalunion.intervalUnion(listOfIntervals) 
 			count += len(rangeList)
 			if len(rangeList) > 0:
 				repeatIntervalDic[key] = rangeList
 				
-		if False:
-			repeatIntervalDic[key] = intervalunion.intervalUnion(listOfIntervals) 
 
 	print "Count", count
 	return repeatIntervalDic
@@ -183,8 +171,8 @@ def mainFlow(folderName):
 	with open(folderName + "blkDicNew.json", 'w') as outfile:
 		json.dump(blkDicNew, outfile)
 
-parser = argparse.ArgumentParser(description='evalmfixer')
-parser.add_argument('folderName')
-args = vars(parser.parse_args())
+#parser = argparse.ArgumentParser(description='evalmfixer')
+#parser.add_argument('folderName')
+#args = vars(parser.parse_args())
 
-mainFlow(args['folderName'])
+#mainFlow(args['folderName'])

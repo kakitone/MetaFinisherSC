@@ -56,7 +56,7 @@ class abunSplitParameterRobot():
 
         self.BRThresX = -1
         self.AbunLowerX = -1
-        self.AbunUpperX = -1
+        self.AbunUpperX = 1.75
 
     def loadData(self, initial_data):
         canLoad = True

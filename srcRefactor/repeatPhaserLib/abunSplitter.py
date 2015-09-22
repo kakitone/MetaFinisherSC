@@ -86,22 +86,26 @@ def getCtTwoToOneAgg(inList ,myCountDic, Gnew, lenDic):
 
 def satisfyMatch(initem ,newOutList, sd):
     print "AbunLower, AbunUpper", abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLower,abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpper
+
     found = -1
     inIndex , inCt = initem[0], initem[1]
     # First check pt
     targetItem = -1
     for outitem in newOutList:
         outIndex, outCt = outitem[0] , outitem[1]
+        print abs(outCt - inCt)
         if abs(outCt - inCt) < abunHouseKeeper.abunGlobalSplitParameterRobot.AbunLower*sd and inIndex != outIndex:
             targetItem = outIndex
             
     # Second check pt
+    
     rejection = False
     for outitem in newOutList:
         outIndex, outCt = outitem[0] , outitem[1]
         if outIndex != targetItem :
             if abs(outCt - inCt) <=abunHouseKeeper.abunGlobalSplitParameterRobot.AbunUpper*sd :
                 rejection = True
+                print "rejection ", abs(outCt - inCt)
                 
     # Combined check 
     if not rejection and targetItem != -1:
@@ -998,6 +1002,7 @@ def XResolution(folderName,contigReadGraph, Gnew, myCountDic, lenDic, N1):
 
 
         combinedList = resolveConflictX(xResolvedList, brResolvedListforX) 
+        print "combinedList", combinedList
 
         Gnew.xResolve(combinedList)        
         Gnew.condense()
@@ -1147,11 +1152,12 @@ def xNodeAdvResolving(Gnew, GContigRead, folderName, myCountDic, lenDic):
             
         sd = np.std(sizeList)
 
-        print "SD: " , sd
+        print "SD: " , sd, len(inListCt), len(inList)
         
         for eachIn in inListCt:
             matchedOut = satisfyMatch(eachIn , outListCt, sd) 
-        
+            print "matchedOut", matchedOut
+
             if matchedOut != -1:
                 leftCtgIndex, rightCtgIndex = eachIn[0], v.nodeIndex
                 inSuccReadsList = abunGraphLib.findPathBtwEndsFast(folderName, leftCtgIndex, rightCtgIndex, GContigRead, N1)

@@ -8,7 +8,7 @@ class IsOddTests(unittest.TestCase):
     
     def setUp(self):
         print "Init : Copying files : "
-        os.system("python ~/experimentBench/test.py")
+        #os.system("python ~/experimentBench/test.py")
         
         self.testingFolder = "unitTestFolder"
         self.mummerPath = "/tmp/MUMmer3.23/"

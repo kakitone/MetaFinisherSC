@@ -15,7 +15,7 @@ In order to do that, here are the steps.
 
         python -m srcRefactor.misassemblyFixerLib.mFixer destinedFolder mummerPath 
 
-2. Run A-Splitter to join contigs based on abundance and overlap information (input is mFixed.fasta, raw\_reads.fasta; output is abun.fasta). Note that raw\_reads.fasta is copied from LR.fasta after running M-Fixer, so there is no need to rename if you run M-Fixer first. But if you want to use A-Splitter alone, then the input filenames are as stated. 
+2. Run A-Splitter  to join contigs based on abundance and overlap information (input is mFixed.fasta, raw\_reads.fasta; output is abun.fasta). Note that raw\_reads.fasta is copied from LR.fasta after running M-Fixer, so there is no need to rename if you run M-Fixer first. But if you want to use A-Splitter alone, then the input filenames are as stated. 
 
         python -m srcRefactor.repeatPhaserLib.aSplitter destinedFolder mummerPath
 

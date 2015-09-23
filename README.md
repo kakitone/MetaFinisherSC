@@ -108,3 +108,5 @@ It is an indicator on the current built powered by Travis-CI. If you issue a pul
 
 ![alt text](https://travis-ci.org/kakitone/MetaFinisherSC.svg?branch=master "Current build status")
 
+Also, if you want to have a look at the commands and stdout of the sample run, you can visit https://travis-ci.org/kakitone/MetaFinisherSC
+

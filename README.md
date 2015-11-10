@@ -11,7 +11,7 @@ The final output is **abun.fasta** after running through the M-Fixer(mis-assembl
 
 In order to do that, here are the steps. 
 
-1. Run M-Fixer which fix misassemblies with information from reads (input is LR.fasta, LC.fasta ; output is mFixed.fasta).
+1. Run M-Fixer to fix misassemblies with information from reads (input is LR.fasta, LC.fasta ; output is mFixed.fasta).
 
         python -m srcRefactor.misassemblyFixerLib.mFixer destinedFolder mummerPath 
 

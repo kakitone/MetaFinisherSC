@@ -6,7 +6,7 @@ python:
 python:
   - "2.7_with_system_site_packages"
 before_install:
-  - sudo apt-get install -qq python-numpy python-scipy python-matplotlib python-biopython python-Levenshtein
+  - sudo apt-get install -qq python-numpy python-scipy python-biopython python-Levenshtein
 install: 
   - wget http://sourceforge.net/projects/mummer/files/mummer/3.23/MUMmer3.23.tar.gz/download -O /tmp/mummer.tar.gz
   - tar -zxvf /tmp/mummer.tar.gz -C /tmp/

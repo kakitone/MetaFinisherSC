@@ -36,9 +36,8 @@ MetaFinisherSC requires the following libraries and softwares. Recommended way t
 
         sudo pip install scipy numpy biopython python-Levenshtein
 
-  Remark: For Linux users, you may also use 
+  Remark: For Linux users, you may also replace pip install step by "sudo apt-get install -qq python-numpy python-scipy python-biopython python-Levenshtein"
   
-        sudo apt-get install -qq python-numpy python-scipy python-biopython python-Levenshtein 
 2. Download MUMmer3.23 
 
         wget http://sourceforge.net/projects/mummer/files/mummer/3.23/MUMmer3.23.tar.gz/download -O /tmp/mummer.tar.gz

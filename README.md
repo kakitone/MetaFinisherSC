@@ -34,7 +34,7 @@ MetaFinisherSC requires the following libraries and softwares. Recommended way t
 
 1. Download the python libraries. 
 
-        sudo pip install scipy numpy biopython python-Levenshtein matplotlib
+        sudo pip install scipy numpy biopython python-Levenshtein
 
 2. Download MUMmer3.23 
 

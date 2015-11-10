@@ -27,6 +27,14 @@ Sometimes, if the names of raw reads and contigs consists of special characters/
         perl -pe 's/>[^\$]*$/">Seg" . ++$n ."\n"/ge' LC.fasta > newLC.fasta
         cp newLC.fasta LC.fasta
 
+### Dependency
+You may want to install the following packages. Suggested commands are as follows.
+
+       sudo apt-get install -qq python-numpy python-scipy python-matplotlib python-biopython python-Levenshtein
+       wget http://sourceforge.net/projects/mummer/files/mummer/3.23/MUMmer3.23.tar.gz/download -O /tmp/mummer.tar.gz
+       tar -zxvf /tmp/mummer.tar.gz -C /tmp/
+       make install -C /tmp/MUMmer3.23/
+
 ### Example ###
 Below is a step by step example on running MetaFinisherSC on the testset provided. In this example, there are two misassembled contigs and we will fix the misassemblies and join them back correctly. The reads are synthetic reads extracted from two synthetic species of different abundances(20X and 50X respectively). Both species share a common segment of length 12000 bp and that the readlength is 6000bp.  
 

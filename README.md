@@ -28,9 +28,7 @@ Sometimes, if the names of raw reads and contigs consists of special characters/
         cp newLC.fasta LC.fasta
 
 ### Dependency
-MetaFinisherSC requires the following. 
-
-Recommended way to download the packages are as follows.
+MetaFinisherSC requires the following libraries and softwares. Recommended way to download the packages is as follows.
 
 1. Download the python libraries. 
 

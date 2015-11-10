@@ -42,13 +42,13 @@
         <h1>
 <a id="metafinishersc" class="anchor" href="#metafinishersc" aria-hidden="true"><span class="octicon octicon-link"></span></a>MetaFinisherSC</h1>
 
-<h3>
-<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h3>
+<h2>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h2>
 
 <p>This tool is for users to upgrade their metagenomics assemblies using long reads. This includes fixing mis-assemblies and scaffolding/gap-filling. If you encounter any issues, please contact me at <a href="mailto:kklam@eecs.berkeley.edu">kklam@eecs.berkeley.edu</a>. My name is Ka-Kit Lam. </p>
 
-<h3>
-<a id="commands-to-run-the-tool" class="anchor" href="#commands-to-run-the-tool" aria-hidden="true"><span class="octicon octicon-link"></span></a>Commands to run the tool</h3>
+<h2>
+<a id="commands-to-run-the-tool" class="anchor" href="#commands-to-run-the-tool" aria-hidden="true"><span class="octicon octicon-link"></span></a>Commands to run the tool</h2>
 
 <p>Assume you have your long reads (LR.fasta) and contigs formed from short/long reads (LC.fasta). </p>
 
@@ -79,8 +79,8 @@
     cp newLC.fasta LC.fasta
 </code></pre>
 
-<h3>
-<a id="dependency" class="anchor" href="#dependency" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dependency</h3>
+<h2>
+<a id="dependency" class="anchor" href="#dependency" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dependency</h2>
 
 <p>MetaFinisherSC requires the following libraries and softwares. Recommended way to download the packages is as follows.</p>
 
@@ -112,8 +112,8 @@ export PATH=$PATH:/tmp/clustalw-2.1/src/
 </li>
 </ol>
 
-<h3>
-<a id="example" class="anchor" href="#example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example</h3>
+<h2>
+<a id="example" class="anchor" href="#example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example</h2>
 
 <p>Below is a step by step example on running MetaFinisherSC on the testset provided. In this example, there are two misassembled contigs and we will fix the misassemblies and join them back correctly. The reads are synthetic reads extracted from two synthetic species of different abundances(20X and 50X respectively). Both species share a common segment of length 12000 bp and that the readlength is 6000bp.  </p>
 

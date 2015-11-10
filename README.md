@@ -89,7 +89,7 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
         /tmp/MUMmer3.23/nucmer  -maxmatch dataFolder/abun.fasta dataFolder/reference.fasta         
 
-        show-coords out.delta
+        /tmp/MUMmer3.23/show-coords out.delta
 
         |   [S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS] 
         |=====================================================================================
@@ -102,7 +102,7 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
         /tmp/MUMmer3.23/nucmer  -maxmatch dataFolder/LC.fasta dataFolder/reference.fasta         
 
-        show-coords out.delta
+        /tmp/MUMmer3.23/show-coords out.delta
 
         |    [S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS]
         |=====================================================================================
@@ -115,7 +115,7 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
         /tmp/MUMmer3.23/nucmer  -maxmatch dataFolder/reference.fasta dataFolder/reference.fasta         
 
-        show-coords out.delta
+        /tmp/MUMmer3.23/show-coords out.delta
         
         |    [S1]     [E1]  |     [S2]     [E2]  |  [LEN 1]  [LEN 2]  |  [% IDY]  | [TAGS]
         |=====================================================================================

@@ -77,7 +77,6 @@ def insertRepeat(genomeList, locListTmp):
     return genomeList
 
         
-
 def genomeGenerate(m):
     G = 5 * pow(10, 6)
     lrepeat = pow(10, 4)

@@ -39,14 +39,10 @@ def extractMumData(folderName, fileName):
     
     return dataList
 
-
-
 def useMummerAlign(mummerLink, folderName, outputName, referenceName, queryName, specialForRaw = False, specialName = "", refinedVersion= False):
     nucmerMummer(specialForRaw, mummerLink, folderName, outputName, referenceName, queryName, refinedVersion)
     showCoorMummer(specialForRaw, mummerLink, folderName, outputName, specialName)
     
-    
-
 def nucmerMummer(specialForRaw, mummerLink, folderName, outputName, referenceName, queryName,refinedVersion):
     if not refinedVersion:
         if not specialForRaw:
@@ -67,7 +63,6 @@ def nucmerMummer(specialForRaw, mummerLink, folderName, outputName, referenceNam
         
     os.system(command)
     
-
 def showCoorMummer(specialForRaw, mummerLink, folderName, outputName, specialName):
     if not specialForRaw:
         command = mummerLink + "show-coords -r " + folderName + outputName + ".delta > " + folderName + outputName + "Out"
@@ -75,7 +70,6 @@ def showCoorMummer(specialForRaw, mummerLink, folderName, outputName, specialNam
         command = mummerLink + "show-coords -r " + folderName + outputName + ".delta > " + folderName + specialName 
         
     os.system(command)
-
 
 def combineMultipleCoorMum(specialForRaw, mummerLink, folderName, outputName, specialName, numberOfFiles):
     print ""
@@ -109,7 +103,6 @@ def zeropadding(i):
     else:
         tmpi = str(i)
     return tmpi
-   
    
 def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw = False, refinedVersion = False):
     # Format for workerList : [[outputName, referenceName, queryName, specialName]... ]
@@ -193,7 +186,6 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                     command = mummerLink + "show-coords -r " + tmpName + "| tail -n+6 >> " + outNameMod
                     os.system(command)
         
-
 def transformCoor(dataList):
     # "Format of the dataList :  1      765  |    11596    10822  |      765      775  |    84.25  | ref_NC_001133_       scf7180000000702"
     newList = []
@@ -209,8 +201,6 @@ def transformCoor(dataList):
             newList.append(tmpitem)
     
     return newList
-
-
 
 def largeRvsQAlign(folderName, numberOfFiles, mummerLink, refFile, qryFile, mumTmpHeader):
     
@@ -252,17 +242,4 @@ def largeRvsQAlign(folderName, numberOfFiles, mummerLink, refFile, qryFile, mumT
         dataList = dataList+ extractMumData(folderName, mumTmpHeader+ str(indexOfMum)+"Out")
     
     return dataList 
-
-    
-    
-    
-    
-        
-        
-
-
-
-
-
-
 

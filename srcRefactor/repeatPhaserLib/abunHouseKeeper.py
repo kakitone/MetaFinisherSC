@@ -6,6 +6,7 @@ abunGlobalAvoidrefine = True
 abunGlobalReadSearchDepth = 0
 abunGlobalRRDisable = True
 abunGlobalRunPickUp = "map"
+abunGlobalRunEM = False
 
 class abunSplitParameterRobot():
     def __init__(self):
@@ -28,7 +29,6 @@ class abunSplitParameterRobot():
     def parameterForGraphSurgery(self):
         self.edgeThres = 1
         self.kthres = 3
-
         self.toRunCondenseRemove = True
         self.toRunTransitive = True
         self.toRunDoubltPtr = True

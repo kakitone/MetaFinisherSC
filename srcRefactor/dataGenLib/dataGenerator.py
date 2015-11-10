@@ -272,8 +272,73 @@ class abunGap_example(dataGeneartorRobot):
         self.repeatLen = 12000
         
 
+#dataRobot = abunGap_example("/tmp/abunGap/")
+#dataRobot.runAll()
+
+class polyGap_example(dataGeneartorRobot):
+    def generateReference(self):
+        lrepeat = self.repeatLen
+    
+        startLoc = self.G / 2
+        endLoc = startLoc + lrepeat
+        
+        locListTmp = dataGenLib.locList()
+        
+        repeatInfoTmp = dataGenLib.repeatInfo()
+        
+        for i in range(self.m):
+            repeatInfoTmp.addRepeatCopy(i, startLoc, endLoc)
+            
+        locListTmp.addRepeatInfo(repeatInfoTmp)
+        
+        
+        seqList = []
+        
+        for i in range(self.m):
+            seqList.append(dataGenLib.randomStringGen(self.G))
+        
+        seqList = dataGenLib.insertRepeat(seqList, locListTmp)
+
+        newSeqList = ["", ""]
+
+        pt1, pt2 = startLoc + lrepeat/3, startLoc + 2*lrepeat/3
+        print pt1, pt2
+        newSeqList[0] =  seqList[0][0:pt1] + 'A' +seqList[0][pt1+1:pt2] +'G' +seqList[0][pt2+1:] 
+        newSeqList[1] =  seqList[1][0:pt1] + 'C' +seqList[1][pt1+1:pt2] +'T' +seqList[1][pt2+1:] 
+        
+        dataGenLib.writeListToFile(self.folderName , 'reference.fasta', newSeqList)
+        
+        
+    def generateContigs(self):
+        print "Generate contigs"
+        genList = dataGenLib.readFromFasta(self.folderName + "reference.fasta")
+        breakPoints = []
+    
+        for i in range(len(genList)):
+            G = len(genList[i])
+            breakPoints.append([i, G/2])
+            
+        segList = dataGenLib.contigBreakDown(genList, breakPoints)
+        
+        seqListNew = [segList[0] + segList[3], segList[2]+ segList[1] ]
+    
+    
+        for eachitem in seqListNew:
+            print len(eachitem)
+        
+        dataGenLib.writeListToFile(self.folderName , 'contigs.fasta', seqListNew)
 
 
-dataRobot = abunGap_example("/tmp/abunGap/")
+    def setParameters(self):
+        self.G= 5*(10**6)
+        self.L = 6000
+        self.p = 0.01
+        self.m = 2
+        self.abun = [50, 50]
+        self.repeatLen = 12000
+        
+
+
+dataRobot = polyGap_example("/tmp/polyGap/")
 dataRobot.runAll()
 

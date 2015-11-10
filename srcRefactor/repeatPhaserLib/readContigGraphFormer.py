@@ -1,5 +1,7 @@
 import os
 import sys 
+from itertools import groupby
+from operator import itemgetter
 
 import abunHouseKeeper
 
@@ -76,7 +78,7 @@ def alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header 
     alignerRobot.combineMultipleCoorMum( True, mummerLink, folderName, header,header +"Out", numberOfFiles)
                     
 
-def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFilename, optTypeFileHeader, graphName):
+def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFilename, optTypeFileHeader, graphName, needAlignment=True):
     
     '''
     Input : all_associated_reads.fasta, improved3.fasta
@@ -95,7 +97,7 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
     
     
     header, referenceFile, queryFile = optTypeFileHeader + "CC", contigFilename + "_Double.fasta" , contigFilename + "_Double.fasta"
-    if True:
+    if needAlignment:
         alignerRobot.useMummerAlign(mummerLink, folderName, header, referenceFile, queryFile)
 
     lenDicCC = IORobot.obtainLength(folderName, contigFilename + "_Double.fasta")
@@ -108,26 +110,19 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
     lenDicRR = IORobot.obtainLength(folderName, readsetFilename + "_Double.fasta")
     
     if not abunHouseKeeper.abunGlobalRRDisable:
-        if True:
+        if needAlignment:
             alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header )
     
         dataListRR = alignerRobot.extractMumData(folderName, header + "Out")
         dataListRR = abunHouseKeeper.filterData(dataListRR, lenDicRR)
-        for eachitem in dataListRR:
-            if eachitem[-2] == "Read164_p" and eachitem[-1] == "Read159_p" :    
-                print "debug" , eachitem
-            if eachitem[-1] == "Read164_p" and eachitem[-2] == "Read159_p" :    
-                print "debug" , eachitem
-            
         dataListRR = abunHouseKeeper.filterDataIdentical(dataListRR, lenDicRR)
 
     else:
         dataListRR = []
     
     header, referenceFile, queryFile = optTypeFileHeader + "CR", contigFilename + "_Double.fasta" , readsetFilename + "_Double.fasta"
-    if True:
+    if needAlignment:
         alignerSubRoutine(folderName ,referenceFile,  queryFile, mummerLink, header )
-        #alignerRobot.useMummerAlign(mummerLink, folderName, header, referenceFile, queryFile)
     
     lenDicCR = dict(lenDicCC.items() + lenDicRR.items())
     dataListCR = alignerRobot.extractMumData(folderName, header + "Out")
@@ -147,26 +142,81 @@ def formReadContigStringGraph(folderName, mummerLink, contigFilename, readsetFil
     
     '''
     
-    # print dataListCC[0]
-    # print dataListRR[0]
-    # print dataListCR[0]
-    
-    # for eachitem in dataListCC:
-    #    print eachitem
     addDataToList(dataListCC, G, 0, 0, 'C', 'C')
-    # for eachitem in dataListRR[0:10]:
-    #    print eachitem , lenDicRR[eachitem[-2]], lenDicRR[eachitem[-1]]
     
     addDataToList(dataListRR, G, N1, N1, 'R', 'R')
     
     addDataToList(dataListCR, G, 0, N1, 'C', 'R')
-    # G.reportEdge()
-    G.saveToFile(folderName, graphName)
+
+    Gnew = formExtraEdges(folderName,optTypeFileHeader, contigFilename, G, N1)
     
-    checkGraphLength(G, N1, lenDicRR)
+    Gnew.saveToFile(folderName, graphName)
     
-    # print len(G.graphNodesList[0].listOfPrevNodes), len(G.graphNodesList[0].listOfNextNodes)
-    print "len(G.graphNodesList)", len(G.graphNodesList)
-    
+    print "len(Gnew.graphNodesList)", len(Gnew .graphNodesList)
     
     
+def formExtraEdges(folderName = "/home/kakitfive/kkdata2/MetaFinisherSC/dataFolderBackup/",optTypeFileHeader="phaseString", contigFilename="improved3", G = [], N1 = 0):
+
+    dataList = alignerRobot.extractMumData(folderName, optTypeFileHeader + "CR" + "Out")
+    dataList.sort(key = itemgetter(-2))
+    lenDic =  IORobot.obtainLength(folderName, contigFilename + "_Double.fasta")
+
+    count = 0
+    tmpItem = []
+    embedContig2ReadDic, read2EmbedContigDic = {}, {}
+
+    for key, items in groupby(dataList, itemgetter(-2)):
+        isEmbedded = False
+        for eachitem in items:
+            #print eachitem
+            if eachitem[4] > lenDic[key]-300 :
+                    isEmbedded = True
+                    tmpItem = eachitem
+
+        if isEmbedded:
+            count = count + 1
+            readName = tmpItem[-1]
+            embedContig2ReadDic[key] = readName
+            read2EmbedContigDic[readName] = key
+
+
+    print "len(embedContig2ReadDic)", len(embedContig2ReadDic)
+
+    #assert(False)
+
+    for contigName in embedContig2ReadDic:
+        readName = embedContig2ReadDic[contigName]
+    
+        readIndex, contigIndex = abunHouseKeeper.parseEdgeNameToID(readName, 'R'), abunHouseKeeper.parseEdgeNameToID(contigName, 'C')
+
+        for eachprev in G.graphNodesList[readIndex].listOfPrevNodes:
+            idNode, wt = eachprev[0], eachprev[1]
+            if idNode < N1:
+                G.insertEdge(idNode, contigIndex, wt)
+
+        for eachnext in G.graphNodesList[readIndex].listOfNextNodes:
+            idNode, wt = eachnext[0], eachnext[1]
+            if idNode < N1:
+                G.insertEdge(contigIndex,idNode,  wt)
+
+
+    return G
+
+
+#formExtraEdges()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

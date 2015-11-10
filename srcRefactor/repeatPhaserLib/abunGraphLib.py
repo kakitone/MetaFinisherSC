@@ -6,8 +6,11 @@ import abunHouseKeeper
 from finisherSCCoreLib import IORobot
 from finisherSCCoreLib import graphLib
 from finisherSCCoreLib import alignerRobot
+from finisherSCCoreLib import houseKeeper
+
 import json
 
+from multiprocessing import Pool
 class seqGraphNodeWt(graphLib.seqGraphNode):
     def __init__(self, nodeIndex):
         graphLib.seqGraphNode.__init__(self, nodeIndex)
@@ -536,10 +539,6 @@ def markReachableIndices(G, Grev, rIn, rOut, N1):
     for i in range(len(Grev.graphNodesList)):
         if len(Grev.graphNodesList[i].visitLabelList) > 0:
             G.graphNodesList[i].visitLabelList = G.graphNodesList[i].visitLabelList + Grev.graphNodesList[i].visitLabelList  
-    
-    
-        
-        
 
 def formReverseGraph(G):
     nNode = len(G.graphNodesList)
@@ -550,7 +549,6 @@ def formReverseGraph(G):
             if haveInserted:      
                 Grev.insertEdge(j, i, 100)
     return Grev
-
 
 def formReverseGraphFast(G):
     nNode = len(G.graphNodesList)
@@ -591,7 +589,6 @@ def markInsideNodes(G, kkIn, kkOut):
     return singleMissList, allPassList
 
 
-
 def checkMiss(myNode, rIn, rOut):
     index = 1997
     myList = myNode.visitLabelList
@@ -604,7 +601,6 @@ def checkMiss(myNode, rIn, rOut):
             return i
             break
     return index
-
 
  
 def markStartEndNodes(G, rIn, rOut, singleMissList, allPassList):
@@ -690,11 +686,16 @@ def markFlankingRegion(G, rIn, rOut, myStartIndex, myEndIndex, N1):
 
 def DFS(G, x, N1, startIndex, endIndex, mypath):
     
-    if x >= N1 or x == startIndex:
+    if (x >= N1 or x == startIndex ) and len(mypath) < 3:
         if G.graphNodesList[x].visited == False:
             G.graphNodesList[x].visited = True
             for eachChild in G.graphNodesList[x].listOfNextNodes:
-                returnpath = DFS(G, eachChild[0], N1, startIndex, endIndex, mypath + [x])
+                #print "startIndex, endIndex, eachChild[0], x", startIndex, endIndex, eachChild[0], x
+                if G.graphNodesList[eachChild[0]].visited == False:
+                    returnpath = DFS(G, eachChild[0], N1, startIndex, endIndex, mypath + [x])
+                else:
+                    returnpath = None
+
                 if returnpath != None :
                     return returnpath
                 
@@ -791,8 +792,6 @@ def checkPathLength(path, G, N1, folderName):
                     overlapLength = overlapLength + eachnext[1]
                     break 
     print sumLength, overlapLength, sumLength - overlapLength
-                
-
 
 def findPathBtwEnds(folderName, leftCtgIndex, rightCtgIndex, contigReadGraph, N1):
     
@@ -912,44 +911,95 @@ def decideCut(folderName, mummerPath):
 
 
 
+def parallelGapLookUp(resolvedList,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename):
+    p = Pool(processes=houseKeeper.globalParallel)
+    results = []
+    
+    for eachmatchpair in resolvedList:
+        results.append(p.apply_async(singleGapLookUp, args=(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename)))
+
+    
+    outputlist = [itemkk.get() for itemkk in results]
+    print  len(outputlist)
+    p.close()
+
+    return outputlist
 
 
+def singleGapLookUp(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename):
 
+    #print eachmatchpair
+    leftCtgIndex ,rightCtgIndex, leftEnd, rightStart, middleContent = eachmatchpair[0],eachmatchpair[-1],0,0,""
+    
+    succReadsList = []
+    G = seqGraphWt(0)
+    G.loadFromFile(folderName, contigReadGraph)
+    succReadsList = BFS(leftCtgIndex,rightCtgIndex, G, N1)
 
+    if len(succReadsList) > 0:
+        succReadsList.pop(0)
+        succReadsList.pop(-1)
+    else:
+        print "interesting item for future study"
 
+    print "succReadsList" , succReadsList
+    
+    if len(succReadsList) == 0:
+        contigName = abunHouseKeeper.parseIDToName(leftCtgIndex, 'C', N1)
+        leftSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
 
+        contigName = abunHouseKeeper.parseIDToName(rightCtgIndex, 'C', N1)
+        rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
+        
+        overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
+        
+        print "overlap contig : ", overlap
+        
+        leftEnd = len(leftSeg) - overlap[0]
+        middleContent = ""
+        
+    else:
+        
+        contigName = abunHouseKeeper.parseIDToName(leftCtgIndex, 'C', N1)
+        print contigName
+        leftSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
+        
+        readName = abunHouseKeeper.parseIDToName(succReadsList[0], 'R', N1)
+        print readName
+        rightSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
+        
+        overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
+        
+        print "overlap start read : ", overlap
+        
+        leftEnd = len(leftSeg) - overlap[0]
+        
+        middleContent = ""
+        
+        for i in range(len(succReadsList)-1):
+            readName = abunHouseKeeper.parseIDToName(succReadsList[i], 'R', N1)
+            leftSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
+        
+            readName = abunHouseKeeper.parseIDToName(succReadsList[i+1], 'R', N1)
+            rightSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
+            
+            overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
+            print "overlap middle read : ", overlap
+            middleContent = middleContent + leftSeg[0:len(leftSeg)-overlap[0]] 
+        
+        
+        readName = abunHouseKeeper.parseIDToName(succReadsList[-1], 'R', N1)
+        leftSeg  = IORobot.myRead(folderName, readsetFilename + "_Double.fasta", readName)
+        
+        contigName = abunHouseKeeper.parseIDToName(rightCtgIndex, 'C', N1)
+        rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
+        
 
+        overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
+        print "overlap end read : ", overlap
+        
+        middleContent = middleContent + leftSeg[0:len(leftSeg)-overlap[0]]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return [leftCtgIndex ,rightCtgIndex, leftEnd, rightStart, middleContent]
+    
 

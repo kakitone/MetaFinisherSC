@@ -53,9 +53,7 @@ def performMapping(folderName, mummerLink, mapcontigsname):
     
     command = "more " + folderName + "mappingResults.txt"
     os.system(command)
-
     
-
 # ## 7) Compare with reference (I: improved.fasta, improved2.fasta, reference.fasta ; O : assembly assessment report )
 
 def compareWithReference(folderName , mummerLink):

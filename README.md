@@ -1,9 +1,11 @@
-# MetaFinisherSC
-### Introduction ###
+MetaFinisherSC
+=============
+
+## Introduction ##
 This tool is for users to upgrade their metagenomics assemblies using long reads. This includes fixing mis-assemblies and scaffolding/gap-filling. If you encounter any issues, please contact me at kklam@eecs.berkeley.edu. My name is Ka-Kit Lam. 
 
 
-### Commands to run the tool ###
+## Commands to run the tool ##
 
 Assume you have your long reads (LR.fasta) and contigs formed from short/long reads (LC.fasta). 
 
@@ -27,7 +29,7 @@ Sometimes, if the names of raw reads and contigs consists of special characters/
         perl -pe 's/>[^\$]*$/">Seg" . ++$n ."\n"/ge' LC.fasta > newLC.fasta
         cp newLC.fasta LC.fasta
 
-### Dependency
+## Dependency ##
 MetaFinisherSC requires the following libraries and softwares. Recommended way to download the packages is as follows.
 
 1. Download the python libraries. 
@@ -49,7 +51,7 @@ MetaFinisherSC requires the following libraries and softwares. Recommended way t
         make
         export PATH=$PATH:/tmp/clustalw-2.1/src/
 
-### Example ###
+## Example ##
 Below is a step by step example on running MetaFinisherSC on the testset provided. In this example, there are two misassembled contigs and we will fix the misassemblies and join them back correctly. The reads are synthetic reads extracted from two synthetic species of different abundances(20X and 50X respectively). Both species share a common segment of length 12000 bp and that the readlength is 6000bp.  
 
 1. Clone MetaFinisherSC

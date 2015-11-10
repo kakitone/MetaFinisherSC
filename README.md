@@ -70,13 +70,13 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
         
         ls -lt
 
-3. Go back to the main directory containing MetaFinisherSC and run the following two commands. Here we assume that /usr/bin/ is the path to your MUMmer. This step can take a few minutes. 
+3. Go back to the main directory containing MetaFinisherSC and run the following two commands. Here we assume that /tmp/MUMmer3.23/ is the path to your MUMmer. This step can take a few minutes. 
         
         cd ../
 
-        python -m srcRefactor.misassemblyFixerLib.mFixer dataFolder/ /usr/bin/
+        python -m srcRefactor.misassemblyFixerLib.mFixer dataFolder/ /tmp/MUMmer3.23/
         
-        python -m srcRefactor.repeatPhaserLib.aSplitter  dataFolder/ /usr/bin/
+        python -m srcRefactor.repeatPhaserLib.aSplitter  dataFolder/ /tmp/MUMmer3.23/
 
 4. Now verify that the original LC.fasta contain 2 contigs whereas the final abun.fasta contains 2 contigs
 
@@ -87,7 +87,7 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
 5. Align the abun.fasta with reference.fasta. 
 
-        nucmer  -maxmatch dataFolder/abun.fasta dataFolder/reference.fasta         
+        /tmp/MUMmer3.23/nucmer  -maxmatch dataFolder/abun.fasta dataFolder/reference.fasta         
 
         show-coords out.delta
 
@@ -100,7 +100,7 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
 6. As a check, you may also want to see that the original contigs are misassembled. This can be seen by 
 
-        nucmer  -maxmatch dataFolder/LC.fasta dataFolder/reference.fasta         
+        /tmp/MUMmer3.23/nucmer  -maxmatch dataFolder/LC.fasta dataFolder/reference.fasta         
 
         show-coords out.delta
 
@@ -113,7 +113,7 @@ Below is a step by step example on running MetaFinisherSC on the testset provide
 
 7. Also, you may also want to check that there is really a common segment of length 12000 across species
 
-        nucmer  -maxmatch dataFolder/reference.fasta dataFolder/reference.fasta         
+        /tmp/MUMmer3.23/nucmer  -maxmatch dataFolder/reference.fasta dataFolder/reference.fasta         
 
         show-coords out.delta
         

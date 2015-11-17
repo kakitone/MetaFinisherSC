@@ -862,7 +862,6 @@ def formPathSeq(folderName, mummerPath, directPathList, indirectPathList, contig
     IORobot.writeSegOut(directPathSeqList,folderName,"directPath.fasta")
     IORobot.writeSegOut(indirectPathSeqList,folderName,"indirectPath.fasta")
 
-
 def decideCut(folderName, mummerPath):
     
     '''
@@ -909,25 +908,48 @@ def decideCut(folderName, mummerPath):
 
     return toDelete
 
-
-
 def parallelGapLookUp(resolvedList,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename):
-    p = Pool(processes=houseKeeper.globalParallel)
-    results = []
-    
-    for eachmatchpair in resolvedList:
-        results.append(p.apply_async(singleGapLookUp, args=(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename)))
+    if houseKeeper.globalRunMPI == False:
+        p = Pool(processes=houseKeeper.globalParallel)
+        results = []
+        
+        for eachmatchpair in resolvedList:
+            results.append(p.apply_async(singleGapLookUp, args=(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename)))
 
-    
-    outputlist = [itemkk.get() for itemkk in results]
-    print  len(outputlist)
-    p.close()
+        outputlist = [itemkk.get() for itemkk in results]
+        print  len(outputlist)
+        p.close()
+    else:
+        from mpi4py import MPI
+        from mpi4py.MPI import ANY_SOURCE
+
+        comm = MPI.COMM_WORLD
+        me = comm.Get_rank()
+        numberOfWorkers = comm.Get_size() - 1
+
+        results = []
+        outputlist = []
+
+        for eachmatchpair in resolvedList:
+            results.append([eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename])
+
+        for i in range(len(results)):
+            data = results[i]
+            data.insert(0, "gapjob")
+            print "master sender", data[0] 
+            comm.send(data, dest=(i%numberOfWorkers) +1)
+            
+
+        for i in range(len(results)):    
+            data = comm.recv(source=ANY_SOURCE)
+            print "master receiver", data[0:3]
+            outputlist.append(data)
+
+
 
     return outputlist
 
-
 def singleGapLookUp(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph, contigFilename,readsetFilename):
-
     #print eachmatchpair
     leftCtgIndex ,rightCtgIndex, leftEnd, rightStart, middleContent = eachmatchpair[0],eachmatchpair[-1],0,0,""
     
@@ -994,7 +1016,6 @@ def singleGapLookUp(eachmatchpair,folderName, N1,  mummerLink,  contigReadGraph,
         contigName = abunHouseKeeper.parseIDToName(rightCtgIndex, 'C', N1)
         rightSeg = IORobot.myRead(folderName, contigFilename + "_Double.fasta", contigName)
         
-
         overlap = IORobot.alignWithName(leftSeg, rightSeg, folderName, mummerLink, str(leftCtgIndex) + "_" + str(rightCtgIndex) )
         print "overlap end read : ", overlap
         

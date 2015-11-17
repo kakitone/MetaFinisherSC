@@ -84,7 +84,7 @@ def preparation(folderName):
 		RList = [] 
 		templateList = []
 
-		numberOfFiles = 20
+		numberOfFiles = houseKeeper.globalParallelFileNum
 		dataList = []
 		for i in range(1, 1+numberOfFiles): 
 			if i < 10:
@@ -838,7 +838,7 @@ def formMathchingList(folderName, contigLeftFileName, contigRightFileName):
 	
 def generateAssociatedReadDic(folderName):
 	dataList = []
-	numberOfFiles = 20
+	numberOfFiles = houseKeeper.globalParallelFileNum
 	for i in range(1, 1+numberOfFiles): 
 		if i < 10:
 			indexOfMum = "0" + str(i)
@@ -902,7 +902,7 @@ def debugging(folderName):
 	print Levenshtein.editops(str2, str4)
 
 def loadRListDic(folderName):
-	numberOfFiles = 20
+	numberOfFiles = houseKeeper.globalParallelFileNum
 	thres = 10000
 
 	dataList = []

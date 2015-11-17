@@ -492,12 +492,8 @@ def checkIncluded(tmp, markedList):
             isIncluded = True
     return isIncluded
 
-
-
-
 def align(leftSeg, rightSeg, folderName, mummerLink):
     return alignWithName(leftSeg, rightSeg, folderName, mummerLink, "overlap")    
-
 
 def alignWithName(leftSeg, rightSeg, folderName, mummerLink, nameOfOut):
     overlap = [0, 0 ] 
@@ -547,8 +543,7 @@ def alignWithName(leftSeg, rightSeg, folderName, mummerLink, nameOfOut):
         overlap = myMax 
     
     return overlap 
-    
-   
+       
 def joinSeg(tmp, folderName, segLookUp, mummerLink, gapContentLookUpDic):
     
     tmpList = []
@@ -587,7 +582,6 @@ def readContigsFromFile(folderName, filename):
     
     f.close()
     return segLookUp
-
 
 def fastaContigNameIndexConversion(folderName, filename):
     i =0 
@@ -680,7 +674,6 @@ def myRead(folderName, fileName,readName) :
     
     return returnStr
 
-
 def pathListToSeqListTransform(pathList, contigList, readList, mummerPath, folderName):
     pathSeqList  = []
 
@@ -689,8 +682,6 @@ def pathListToSeqListTransform(pathList, contigList, readList, mummerPath, folde
         pathSeqList.append(pSeq)
 
     return pathSeqList
-
-
 
 def alignAndMerge(p, contigList, readList, mummerPath, folderName):
     pSeq = []

@@ -68,7 +68,7 @@ def getAllAssociatedReads(folderName, mummerLink,forFastaName):
     if N >0 :
         for trial in range(N):
             print "trial", trial
-            numberOfFiles = 20
+            numberOfFiles = houseKeeper.globalParallelFileNum
             
             if True: 
                 workerList = []

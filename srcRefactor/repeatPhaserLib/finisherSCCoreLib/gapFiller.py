@@ -113,7 +113,7 @@ def formRelatedReadsFile(folderName, mummerLink, inputFileName):
     assoiatedReadIndex = []
     nameList = []
     
-    numberOfFiles = 20
+    numberOfFiles = houseKeeper.globalParallelFileNum
     
     if True:
         bindir = os.path.abspath(os.path.dirname(sys.argv[0]))
@@ -133,8 +133,6 @@ def formRelatedReadsFile(folderName, mummerLink, inputFileName):
             
         outputName, referenceName, queryName, specialName=  "outGapFillRaw"+indexOfMum , inputFileName+"Trunc.fasta", "raw_reads.part-" + indexOfMum + ".fasta", "fromMum" + indexOfMum 
         workerList.append([outputName, referenceName, queryName, specialName])
-    
-    
     
     if True:
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,True)
@@ -234,7 +232,6 @@ def formRelatedReadsFile(folderName, mummerLink, inputFileName):
     
     IORobot.writeToFile_Double1(folderName, "relatedReads.fasta", "relatedReads_Double.fasta", "read")
     
-
     
 def extractEdgeSet(folderName, mummerLink, option="nopolish"):
     # Tasks: reconstruct the string  graph
@@ -263,7 +260,7 @@ def extractEdgeSet(folderName, mummerLink, option="nopolish"):
     IORobot.truncateEndOfContigs(folderName, "improved_Double.fasta", "smaller_improvedContig.fasta", 25000, lengthDic)
     dataSet = []
     
-    numberOfFiles = 20
+    numberOfFiles = houseKeeper.globalParallelFileNum
     
 
     if True:
@@ -602,7 +599,6 @@ def writeContigReadCombine(blockedSet, dataSet, folderName, rawReadList, numberO
         fImproved.write('\n')
         
     fImproved.close()
-
 
 
 def filterRepeatEnd(dataSet, usableJunction):

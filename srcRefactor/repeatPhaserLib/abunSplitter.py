@@ -19,7 +19,6 @@ import readContigGraphFormer
 import repeatFinder
 import abunHouseKeeper
 import abunGraphLib
-import emalgo
 
 
 ### Abundance split and its subroutines
@@ -319,7 +318,7 @@ def evaluateCoverage(dataList, lenDic, readLenDic, folderName,mummerLink, contin
     '''
     
     if continueFilter:
-        numberOfFiles= 20
+        numberOfFiles= houseKeeper.globalParallelFileNum
         
         IORobot.putListToFileO(folderName, "raw_reads.fasta" , "selected_raw", toAddReadList)
         
@@ -361,7 +360,7 @@ def generateAbundanceGraph(folderName, mummerLink, contigFilename):
         a. MUMmer, Bowtie, bbmap, any that works V 
         b. And then write a short parser to parse the results V 
     '''
-    numberOfFiles = 20
+    numberOfFiles = houseKeeper.globalParallelFileNum
     workerList = []
     for dummyI in range(1, numberOfFiles + 1):
         indexOfMum = ""
@@ -767,6 +766,7 @@ def BResolution(Gnew, folderName, contigReadGraph, N1, myCountDic, lenDic, mumme
                     resolvedCombine = resolveConflict(combinedList)
                     Gnew.bipartiteLocalResolve(resolvedCombine , inList, outList, folderName)
             else:
+                import emalgo
                 resolvedCombine = emalgo.BResolvePreparation(folderName, inList, outList,  G, Grev, N1, mummerLink)
                 Gnew.bipartiteLocalResolve(resolvedCombine , inList, outList, folderName)
 
@@ -913,6 +913,7 @@ def readContigForAbunSplit(folderName,mummerLink,  contigFilename, readsetFilena
 
 def xNodeEMResolving(Gnew, GContigRead,Grev, folderName, myCountDic, lenDic, N1, mummerLink):
     print "emalgo"
+    import emalgo
     combinedList = emalgo.XResolvePreparation(Gnew, GContigRead,Grev, folderName, myCountDic, lenDic, N1, mummerLink)
     print "combinedList", combinedList
     return combinedList
@@ -1149,7 +1150,8 @@ def abunSplitAdvResolve(folderName, mummerLink, myCountDic,contigReadGraph,  con
     6)Read contigs out from graph
     7)CheckAns and get it done today again... 
     '''
-    emalgo.generateAssociatedReadDic(folderName) 
+    if abunHouseKeeper.abunGlobalRunEM == True:
+        emalgo.generateAssociatedReadDic(folderName) 
     
     lenDic = IORobot.obtainLength(folderName, contigFilename+"_Double.fasta")
     N1 = len(lenDic)
@@ -1207,13 +1209,11 @@ def mainFlow(folderName, mummerLink):
     repeatFilename = "phaseRepeat.txt"
     repeatSpec = "repeatSpecification.txt"
     optionToRun = "xphase"
-    
-        
+
     if abunHouseKeeper.abunGlobalRunPickUp == "map" :
         associatedReadFinder.getAllAssociatedReads(folderName, mummerLink,readsetFilename)
         readContigGraphFormer.formReadContigStringGraph(folderName, mummerLink,contigFilename, readsetFilename, optTypeFileHeader , contigReadGraph )
         repeatFinder.identifyRepeat(folderName, mummerLink,contigFilename,contigReadGraph, repeatFilename, optionToRun )
-        
     
     if abunHouseKeeper.abunGlobalRunPickUp == "map" or abunHouseKeeper.abunGlobalRunPickUp == "count" :
         myCountDic = generateAbundanceGraph(folderName, mummerLink, contigFilename)
@@ -1229,13 +1229,6 @@ def mainFlow(folderName, mummerLink):
         
     os.system("cp selected_raw.part-* "+ folderName )
     os.system("rm selected_raw.part-*")
-  
-
-
-
-
-
-
 
 
 

@@ -5,6 +5,9 @@ globalFast = False
 globalParallel = 1
 globalLarge = False
 globalRelaxThres = False
+globalRunMPI = False
+globalParallelFileNum = 20
+
 
 def quastEvaluate(folderName, quastLink, originalName, improvedNameList, referenceName):
     

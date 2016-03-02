@@ -14,6 +14,9 @@ import srcRefactor.misassemblyFixerLib.intervalunion as intervalunion
 
 '''
 Goal: Calculate the precision/recall for MFixer
+Usage : python srcRefactor/evalmfixer.py dataset0/ ./tmp/MUMmer3.23/
+
+----------------------------------------------------------------------------------------------------------
 
 Input : contigs.fasta, reference.fasta 
 Output: [precision, recall] at each step of MFixer
@@ -29,13 +32,13 @@ def readInJSON(folderName, filename):
 	dataItem = json.load(json_data)
 	return dataItem
 
-def GTFinder(folderName,inputfile):
+def GTFinder(folderName,inputfile,mummerPath):
 	# GTFinder { I: LC.fasta, LC_filtered.fasta, reference.fasta; O: GTMap = [ [ contigsName,  [ [start1,end1], [start2, end2], ... ]] , ... , ] }
 	# "Format of the dataList :  1      765  |    11596    10822  |      765      775  |    84.25  |        scf7180000000702    ref_NC_001133_"
 
 	### Finding the alignment 
-	if False:
-		alignerRobot.useMummerAlign("/usr/bin/", folderName, "groundTruthMatchFixer"+inputfile, inputfile, "reference.fasta", False, "", False)
+	if True:
+		alignerRobot.useMummerAlign(mummerPath, folderName, "groundTruthMatchFixer"+inputfile, inputfile, "reference.fasta", False, "", False)
 	
 	dataList = alignerRobot.extractMumData(folderName, "groundTruthMatchFixer" +inputfile+ "Out")
 
@@ -181,18 +184,20 @@ def CalculatePreRecall(folderName, filename, bkPtList, carryover=0):
 
 	return indComponentTestListMFixer
 	
-def mainFlow(folderName):
+def mainFlow(folderName, mummerPath):
 
 	print "MFixer analysis."
 	#folderName = os.path.abspath(os.path.dirname(sys.argv[0])) + "/" +folderName
 
 	bkPtList = ["adaptorSkippedLogDic.json"]
-	GTFinder(folderName,"LC.fasta")
+	GTFinder(folderName,"LC.fasta", mummerPath)
 	indComponentTestListMFixer = CalculatePreRecall(folderName,"LC.fasta",bkPtList, 0)
 
 
-	GTFinder(folderName,"LC_filtered.fasta")
-	bkPtList = ["blkDic.json",  "repeatDic.json", "modifiedOutliners.json" , "blkDicNew.json"] 
+	GTFinder(folderName,"LC_filtered.fasta", mummerPath)
+	#bkPtList = ["blkDic.json",  "repeatDic.json", "modifiedOutliners.json" , "blkDicNew.json"] 
+	bkPtList = ["blkDic.json"] 
+	
 	indComponentTestListMFixer2 = CalculatePreRecall(folderName, "LC_filtered.fasta", bkPtList, indComponentTestListMFixer[0][-2])
 
 	combined = indComponentTestListMFixer + indComponentTestListMFixer2
@@ -205,17 +210,20 @@ def unitTesting():
 	folderName = "dataFolder/"
 	if True:
 		GTFinder(folderName, "LC.fasta")
-	if False:
+	if True:
 		BKPtMarker(folderName)
-	if False:
+	if True:
 		CalculatePreRecall(folderName)
 
 parser = argparse.ArgumentParser(description='evalmfixer')
 parser.add_argument('folderName')
+parser.add_argument('mummerPath')
+
 args = vars(parser.parse_args())
 
 folderName = args['folderName']
-mainFlow(folderName)
+mummerPath = args['mummerPath']
+mainFlow(folderName, mummerPath)
 
 
 

@@ -13,6 +13,7 @@ from srcRefactor.repeatPhaserLib.finisherSCCoreLib \
 from operator import itemgetter
 from itertools import groupby
 import os ,sys
+import argparse
 
 print "ASplitter analysis."
 
@@ -43,11 +44,11 @@ def isMatch(eachitem, lenDic):
 	else: 
 		return 'n'
 
-def findGroundTruth(folderName):
+def findGroundTruth(folderName, mummerPath):
 	# "Format of the dataList :  1      765  |    11596    10822  |      765      775  |    84.25  | ref_NC_001133_       scf7180000000702"
 
-	if False:
-		alignerRobot.useMummerAlign("/usr/bin/", folderName, "groundTruthMatch", "reference.fasta", "improved3_Double.fasta", False, "", False)
+	if True:
+		alignerRobot.useMummerAlign(mummerPath, folderName, "groundTruthMatch", "reference.fasta", "improved3_Double.fasta", False, "", False)
 	
 	dataList = alignerRobot.extractMumData(folderName, "groundTruthMatch" + "Out")
 
@@ -93,13 +94,10 @@ def isInside(mySortedList, item):
 	else:
 		return False
 
-def calculatePrecisionRecall():
-	folderName = "dataFolder0/"
-	folderName =  os.path.abspath(os.path.dirname(sys.argv[0])) + "/" + folderName
-
+def calculatePrecisionRecall(folderName, mummerPath):
+	
 	matchedListAtStages = loadDataFromStages(folderName)
-	allPossibleMatches = findGroundTruth(folderName)
-
+	allPossibleMatches = findGroundTruth(folderName,mummerPath)
 
 	c = len(allPossibleMatches)
 	alreadyUsedList = []
@@ -146,8 +144,19 @@ def unitTesting():
 	if True:
 		findGroundTruth("dataFolder0/")
 
-calculatePrecisionRecall()
+parser = argparse.ArgumentParser(description='evalasplitter')
+parser.add_argument('folderName')
+parser.add_argument('mummerPath')
 
+args = vars(parser.parse_args())
+
+folderName = args['folderName']
+mummerPath = args['mummerPath']
+calculatePrecisionRecall(folderName, mummerPath)
+
+
+
+# calculatePrecisionRecall()
 # unitTesting()
 
 

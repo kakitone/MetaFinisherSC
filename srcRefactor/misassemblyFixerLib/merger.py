@@ -56,6 +56,7 @@ High level interface  :
         2. Obtain a mis-assembly fixed and non-redundant contigs from SC; 
             call it SC_n
         3. Combine SC_n and LC_n and output it as contigs.fasta
+
 '''
     
 def combineResults(folderName):
@@ -97,7 +98,6 @@ Subroutine 1: Obtain LC_n
 
     Remark : criterion to break == imbalance of abundances
 '''
-
 def completelyEmbedSR2TR(eachsub, lenDic) :
     #  "Format of the dataList :  1      765  |    11596    10822  |      765      775  |    84.25  | ref_NC_001133_       scf7180000000702"
     
@@ -123,7 +123,6 @@ def completelyEmbedSR2TR(eachsub, lenDic) :
         else:
             return False
 
-
 def assignCoverage(dataitem, coveragePerContigsDic):
     contigName = dataitem[-2]
     startPt, endPt = dataitem[0], dataitem[1]
@@ -140,7 +139,6 @@ def assignCoverage(dataitem, coveragePerContigsDic):
     for i in range(startPt-1, endPt):
         coveragePerContigsDic[contigName][i] += 1
     
-
 def alignSR2LC(folderName, mummerLink, incontigName):
     print "alignSR2LC"
     '''
@@ -191,7 +189,6 @@ def alignSR2LC(folderName, mummerLink, incontigName):
     with open(folderName + "coveragePerContigs.json", 'w') as outfile:
         json.dump(coveragePerContigsDic, outfile)
     
-
 def obtainTDiffVec(covVec, T):
     n = len(covVec)
     tDiffVec = [0 for i in range(n)]
@@ -216,7 +213,6 @@ def obtainTDiffVec(covVec, T):
         
     return tDiffVec 
 
-
 def interQuartile_sd(tDiffVec, T):
     sd = 1
     quartile = np.percentile(tDiffVec, 25)
@@ -232,7 +228,6 @@ def interQuartile_sd(tDiffVec, T):
     sd = np.std(stdList)
     
     return sd
-
     
 def findOutliners(tDiffVec, sd, T):
     outLiners = []
@@ -261,7 +256,6 @@ def findOutliners(tDiffVec, sd, T):
                     deletedList[j] = True
     
     return outLiners
-
 
 def filterBreakPts(outLiners, T, covVec, sd):
     modifiedOutliners =  []
@@ -334,7 +328,6 @@ def fineToneBreakPts(outLiners, T, covVec):
     
     return modifiedOutliners
 
-
 def breakAcBkPts(contig, modifiedOutliners):
     contigBreakDown = []
     m = len(modifiedOutliners) - 2
@@ -347,11 +340,9 @@ def breakAcBkPts(contig, modifiedOutliners):
         
     return contigBreakDown
 
-
 def breakAcBkPtsTwoSided(contig, modifiedOutlinersOld, folderName, mummerLink):
     contigBreakDown = []
-    
-    
+
     modifiedOutliners = [] 
     for eachitem in modifiedOutlinersOld:
         tmpList = []
@@ -425,8 +416,7 @@ def breakAcBkPtsTwoSided(contig, modifiedOutlinersOld, folderName, mummerLink):
                 else:
                     rightpart = ""
                     print "overlap error ? :", overlap 
-            
-        
+
         #assert(1==2)
         middlepart = contig[begin:end] 
         
@@ -519,8 +509,7 @@ def fixLCMisassembly(folderName, mummerLink, inputName):
         alignSR2LC(folderName, mummerLink,inputName )
     breakLC(folderName, inputName)
         
-'''
-        
+'''        
 Subroutine 2: Obtain SC_n
     Input : SC.fasta, LC_n.fasta, LR.fasta
     Output : SC_n.fasta
@@ -539,7 +528,6 @@ Subroutine 2: Obtain SC_n
 
 Command to run :  python -m  srcRefactor.misassemblyFixerLib.merger
 from ..repeatPhaserLib.finisherSCCoreLib import IORobot
-
 '''
 
 def findRedundantSC(folderName, mummerLink):
@@ -766,7 +754,7 @@ def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
 
         # if name1!= name2  and matchLen1> matchThres:
         if name1!= name2   and  ( min(lenDic[name1] - end1, lenDic[name2] - end2 ) > nonMatchThres or min(start1, start2) > nonMatchThres ) and matchLen1> matchThres:
-            print "eachitem ", eachitem, lenDic[name1], lenDic[name2]
+            # print "eachitem ", eachitem, lenDic[name1], lenDic[name2]
             count = count + 1
             newDataList.append(eachitem)
 
@@ -778,6 +766,7 @@ def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
 
         repeatIntervalDic = mergerHelper.repeatFinder(folderName, "LC_filtered")
         blkDic = mergerHelper.groupCTest(folderName, repeatIntervalDic)
+
         #breakLC(folderName, inputName)
         #blkDic = getBreakPointFromDataList(folderName, newDataList, inputName)
         #json_data = open(folderName + "blkDicNew.json", 'r')
@@ -785,8 +774,8 @@ def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
 
     else:
         blkDic = breakPtGettingHack2(folderName, newDataList, inputName)
-        
 
+    
     if True:
         with open(folderName + "blkDic.json", 'w') as outfile:
             json.dump(blkDic, outfile)
@@ -803,6 +792,7 @@ def onlyLRMiassemblyFix(folderName, mummerLink, inputName ):
             contigList = contigList + breakAcBkPts(LCList[eachcontig], blkDic[eachcontig])
 
     print "len(contigList)", len(contigList)
+    
     IORobot.writeSegOut(contigList, folderName, "LC_n.fasta")
     
 def withinBound(sep, mylist, bkpt ):

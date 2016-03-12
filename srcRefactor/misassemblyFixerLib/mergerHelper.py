@@ -13,6 +13,8 @@ import json
 import numpy as np
 import argparse
 import  intervalunion
+import breakPointFinding
+
 
 def repeatFinder(folderName, inputName):
 	'''
@@ -46,26 +48,31 @@ def repeatFinder(folderName, inputName):
 	# assert(False)
 	newDataList.sort(key = itemgetter(-2))
 
-	repeatIntervalDic = {}
 
-	count =0 
-	for key, items in groupby(newDataList, itemgetter(-2)):
-		
-		listOfIntervals = []
-		for eachsub in items:
-			listOfIntervals.append([eachsub[0], eachsub[1]])
+	if False:
+		### Old method 
+		repeatIntervalDic = {}
+		count =0 
+		for key, items in groupby(newDataList, itemgetter(-2)):
+			
+			listOfIntervals = []
+			for eachsub in items:
+				listOfIntervals.append([eachsub[0], eachsub[1]])
 
+			if True:
+				thres = 30
+				B = intervalunion.intervalCover(listOfIntervals, thres)
+				rangeList = intervalunion.reportMisAssemblyIntervals2(B, lenDic[key], thres, key)
+				count += len(rangeList)
+				if len(rangeList) > 0:
+					repeatIntervalDic[key] = rangeList
 
-		if True:
-			thres = 30
-			B = intervalunion.intervalCover(listOfIntervals, thres)
-			rangeList = intervalunion.reportMisAssemblyIntervals2(B, lenDic[key], thres, key)
-			count += len(rangeList)
-			if len(rangeList) > 0:
-				repeatIntervalDic[key] = rangeList
-				
+		print "Count", count
+		print repeatIntervalDic
 
-	print "Count", count
+	else:
+		repeatIntervalDic = breakPointFinding.returnBkPtBoolSat(newDataList)
+
 	return repeatIntervalDic
 
 def groupCTest(folderName, repeatIntervalDic):

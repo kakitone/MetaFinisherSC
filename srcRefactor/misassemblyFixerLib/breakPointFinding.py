@@ -490,9 +490,9 @@ def findInOutList(linearSeqs, bkPt2ClustersMapDic):
 			if (len(prevList) > 1 or nonRepeatIn) and (len(nextList) > 1 or nonRepeatOut)  and (len(nextList) > 1 or len(prevList) > 1):
 			
 				setOfChoices.append([inList, outList])
-				print key, inList, outList ,  prevList, nextList, nonRepeatIn, nonRepeatOut
+				# print key, inList, outList ,  prevList, nextList, nonRepeatIn, nonRepeatOut
 			
-	print "------------------------------------------------------------------"
+	# print "------------------------------------------------------------------"
 	return setOfChoices 
 
 def findNonRepeatPairs(bkPt2ClustersMapDic, indicesPairList, endAppendedList) :

@@ -41,7 +41,7 @@ class bkFindingAlgoTest(unittest.TestCase):
 		Output : 	setOfChoices = [[[11], [12] ],  [ [1,2,3] , [4,5,6] ] , [ [ 4, 5], [ 9, 10] ] ]
 		'''
 
-		linearSeqs, bkPt2ClustersMapDic = [ [1, 2 ], [3, 4] ], {1:1, 2:2, 3:1, 4:2  }
+		linearSeqs, bkPt2ClustersMapDic = [ [1, 2 ], [3, 4] ], {1:[1, 0], 2: [2, 1] , 3:[1,2], 4:[2,3]  }
 		setOfChoices = breakPointFinding.findInOutList(linearSeqs, bkPt2ClustersMapDic)
 		setOfChoices.sort() 				
 
@@ -50,13 +50,40 @@ class bkFindingAlgoTest(unittest.TestCase):
  		
 		assert(setOfChoices == expectedSetOfChoices)	
 
-		linearSeqs, bkPt2ClustersMapDic = [ [1, 2 , 3 ], [4, 5, 6, 7], [8,9,10] ], { 1:1 ,2:2 , 3:3 , 4: 1, 5:2, 6:3, 7:4, 8:2, 9:3, 10:4 }
+		linearSeqs, bkPt2ClustersMapDic = [ [1, 2 , 3 ], [4, 5, 6, 7], [8,9,10] ], { 1:[1, 0] ,2:[2, -2] , 3:[3,1] , 4: [1, 2], 5:[2, 0], 6:[3,3] , 7:[4, 1] , 8:[2,2] , 9:[3, -5] , 10:[4,3] }
+
 		setOfChoices = breakPointFinding.findInOutList(linearSeqs, bkPt2ClustersMapDic)
 		setOfChoices.sort()
 
 		expectedSetOfChoices = [[[2, 5, 8], [3, 6, 9]]]
 		
 		assert(setOfChoices == expectedSetOfChoices)
+
+	def test_findInOutList2(self):
+		'''	
+		Input : 	linearSeqs  =   [[1 , 2, 3, 4, 5, 6], [7,8,9,10], [11, 12, 13] ] <--- cannot duplicated , bkPt2ClustersMapDic   
+		Output : 	setOfChoices = [[[11], [12] ],  [ [1,2,3] , [4,5,6] ] , [ [ 4, 5], [ 9, 10] ] ]
+		'''
+
+		linearSeqs, bkPt2ClustersMapDic = [ [1, 2 ], [3, 4] ], {1:[1, 0], 2:[2,1 ], 3:[2,2], 4:[1,3]  }
+		setOfChoices = breakPointFinding.findInOutList(linearSeqs, bkPt2ClustersMapDic)
+		setOfChoices.sort() 				
+		
+		# print "setOfChoices", setOfChoices
+		expectedSetOfChoices = [[[1, 4], [2, 3]]]
+ 		
+		assert(setOfChoices == expectedSetOfChoices)	
+		
+		linearSeqs, bkPt2ClustersMapDic = [ [1, 2 ,3 , 4], [5, 6, 7, 8] ], {1:[1 ,0 ], 2:[ 2,1  ], 3:[ 3,0 ], 4:[4 ,1 ] , 5:[1 ,2 ], 6:[2 ,3  ], 7:[ 3,2], 8:[ 4,3 ]  }
+		
+		setOfChoices = breakPointFinding.findInOutList(linearSeqs, bkPt2ClustersMapDic)
+		setOfChoices.sort() 				
+		
+		# print "setOfChoices", setOfChoices
+		# print setOfChoices
+		expectedSetOfChoices = [[[1, 5], [2, 6]], [[3, 7], [4, 8]]   ]
+ 		
+		assert(setOfChoices == expectedSetOfChoices)	
 
 	def test_formNaturalBkPts(self):
 		mummerDataList = []
@@ -130,15 +157,15 @@ class bkFindingAlgoTest(unittest.TestCase):
 	def test_clusterBkPts(self):
 		newbkts  = [	\
 						[0, 0, 0, 0, 'Contig1', 1001], \
-						[8, 1, -1, 2, 'Contig1', 1501],\
+						[8, 1, -2, 2, 'Contig1', 1501],\
 						[1, 0, 1, 1, 'Contig1', 2001],\
 						[2, 0, 2, 0, 'Contig2', 1001],\
 						[4, 1, 0, 2, 'Contig2', 1501],\
 						[3, 0, 3, 1, 'Contig2', 2001],\
 						[5, 1, 1, 3, 'Contig2', 2501],\
 						[7, 1, 2, 3, 'Contig3', 1501],\
-						[9, 0, -1, 1, 'Contig3', 2001],\
-						[10, 0, -1, 4, 'Contig3', 2002],\
+						[9, 0, -5, 1, 'Contig3', 2001],\
+						[10, 0, -5, 4, 'Contig3', 2002],\
 						[6, 1, 3, 2, 'Contig3', 2501]\
 				   ]
 
@@ -146,14 +173,14 @@ class bkFindingAlgoTest(unittest.TestCase):
 
 		expectedNewClusteredBks = [ \
 			[0, 0, 0, 0, 'Contig1', 1001], \
-			[8, 1, -1, 2, 'Contig1', 1501],\
+			[8, 1, -2, 2, 'Contig1', 1501],\
 			[1, 0, 1, 4, 'Contig1', 2001],\
 			[2, 0, 2, 0, 'Contig2', 1001],\
 			[4, 1, 0, 2, 'Contig2', 1501],\
 			[3, 0, 3, 4, 'Contig2', 2001],\
 			[5, 1, 1, 3, 'Contig2', 2501],\
 			[7, 1, 2, 3, 'Contig3', 1501],\
-			[9, 0, -1, 4, 'Contig3', 2001],\
+			[9, 0, -5, 4, 'Contig3', 2001],\
 			[6, 1, 3, 2, 'Contig3', 2501] \
 		] 
 
@@ -162,21 +189,22 @@ class bkFindingAlgoTest(unittest.TestCase):
 	def test_findSeqs(self):
 		newClusteredBks = [ \
 			[0, 0, 0, 0, 'Contig1', 1001], \
-			[8, 1, -1, 2, 'Contig1', 1501],\
+			[8, 1, -2, 2, 'Contig1', 1501],\
 			[1, 0, 1, 4, 'Contig1', 2001],\
 			[2, 0, 2, 0, 'Contig2', 1001],\
 			[4, 1, 0, 2, 'Contig2', 1501],\
 			[3, 0, 3, 4, 'Contig2', 2001],\
 			[5, 1, 1, 3, 'Contig2', 2501],\
 			[7, 1, 2, 3, 'Contig3', 1501],\
-			[9, 0, -1, 4, 'Contig3', 2001],\
+			[9, 0, -5, 4, 'Contig3', 2001],\
 			[6, 1, 3, 2, 'Contig3', 2501] \
 		] 
 
 		linearSeqs, bkPt2ClustersMapDic = breakPointFinding.findSeqs(newClusteredBks)
 
 		expectedLinearSeqs = [[0, 8, 1], [2, 4, 3, 5], [7, 9, 6]]
-		expectedBkPt2ClustersMapDic = {0: 0, 1: 4, 2: 0, 3: 4, 4: 2, 5: 3, 6: 2, 7: 3, 8: 2, 9: 4}
+		expectedBkPt2ClustersMapDic = {0: [0, 0] , 1: [4, 1], 2: [0, 2] , 3: [4,3] , 4: [2,0 ] , 5: [3,1 ] ,  6: [2,3 ] , 7: [3, 2] , 8: [2,-2], 9:[4,-5] }
+
 
 		assert(linearSeqs == expectedLinearSeqs)
 		assert(bkPt2ClustersMapDic == expectedBkPt2ClustersMapDic )
@@ -209,20 +237,20 @@ class bkFindingAlgoTest(unittest.TestCase):
 		
 		newClusteredBks = [ \
 			[0, 0, 0, 0,  'Contig1', 1001], \
-			[8, 1, -1, 2, 'Contig1', 1501],\
+			[8, 1, -2, 2, 'Contig1', 1501],\
 			[1, 0, 1, 4, 'Contig1', 2001], \
 			[2, 0, 2, 0, 'Contig2', 1001], \
 			[4, 1, 0, 2, 'Contig2', 1501], \
 			[3, 0, 3, 4, 'Contig2', 2001], \
 			[5, 1, 1, 3, 'Contig2', 2501], \
 			[7, 1, 2, 3, 'Contig3', 1501], \
-			[9, 0, -1, 4, 'Contig3', 2001], \
+			[9, 0, -5, 4, 'Contig3', 2001], \
 			[6, 1, 3, 2, 'Contig3', 2501] \
 		] 
 
 		returnFormattedBkPtList = breakPointFinding.returnBkPts(combineCutList, newClusteredBks)
 		
-		print returnFormattedBkPtList
+		# print returnFormattedBkPtList
 
 		assert(True)
 

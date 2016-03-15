@@ -22,27 +22,28 @@ def repeatFinder(folderName, inputName):
 	Output : repeatIntervalDic
 	'''
 	dataList = alignerRobot.extractMumData(folderName, "self"+inputName+"Out")
-	dataList = alignerRobot.transformCoor(dataList)
+	#dataList = alignerRobot.transformCoor(dataList)
 	lenDic = IORobot.obtainLength(folderName, inputName+'.fasta')
 
 	matchThres = 8000
 	nonMatchThres = 2
 
-	separationThres = 5000
+	separationThres = 1000
 	
 	newDataList= []
 
 	for eachitem in dataList:
 		name1, name2 = eachitem[-2], eachitem[-1]
 		matchLen1 , matchLen2 = eachitem[4], eachitem[5]
-		start1 , end1, start2, end2 = eachitem[0], eachitem[1], eachitem[2], eachitem[3]
+		start1 , end1, start2, end2 = eachitem[0], eachitem[1], min(eachitem[2:4]), max(eachitem[2:4])
 
+		
 		if name1!= name2   and  ( min(lenDic[name1] - end1, lenDic[name2] - end2 ) > nonMatchThres or min(start1, start2) > nonMatchThres ) and matchLen1> matchThres:
 			newDataList.append(eachitem)
-		elif name1 == name2 and abs(start1 - start2) > separationThres  and abs(end1 - end2 ) > separationThres and matchLen1 > matchThres:
+		elif name1 == name2 and abs(start1 - start2) > matchLen1  + separationThres  and matchLen1 > matchThres:
 			#print eachitem
 			newDataList.append(eachitem)
-
+	
 	#print len(newDataList), newDataList[0]
 	# 351 [1, 17852, 1, 17842, 17852, 17842, 98.11, 'Segkk0', 'Segkk128']
 	# assert(False)

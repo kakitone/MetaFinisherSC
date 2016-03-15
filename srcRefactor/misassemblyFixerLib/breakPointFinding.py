@@ -160,42 +160,63 @@ def fillInHidden(involvedBkPtsList):
 
 	### <--- fill in the blanks accordingly then you should be fine. 
 	# [3, 0, 3, 1, 'Contig2', 2001]
+	thres = 400 
+	firstAddGroup, secondAddGroup  = [] , []
 
 	if reverse == False:
 		firstBegin, secondBegin = involvedBkPtsList[0][0][-1], involvedBkPtsList[1][0][-1]
 
 		firstContigName , secondContigName = involvedBkPtsList[0][0][-2], involvedBkPtsList[1][0][-2]
 
-		# print "firstContigName, secondContigName", firstContigName, secondContigName
+		firstAddGroup.append(involvedBkPtsList[0][0])
 
 		for eachitem in newFirstList:
-			newItems.append([ -1 , eachitem[1]  , -1, eachitem[3] , firstContigName ,  eachitem[-1] - secondBegin + firstBegin])
+			firstAddGroup.append([ -1 , eachitem[1]  , -2- eachitem[2], eachitem[3] , firstContigName ,  eachitem[-1] - secondBegin + firstBegin])
 
-		for eachitem in newSecondList:
-			newItems.append([ -1 , eachitem[1]  , -1 , eachitem[3], secondContigName, eachitem[-1] - firstBegin + secondBegin])
+		firstAddGroup.append(involvedBkPtsList[0][-1])
+
+		secondAddGroup.append(involvedBkPtsList[1][0])
+		
+		for eachitem in newSecondList:	
+			secondAddGroup.append([ -1 , eachitem[1]  , -2- eachitem[2] , eachitem[3], secondContigName, eachitem[-1] - firstBegin + secondBegin])
+
+		secondAddGroup.append(involvedBkPtsList[1][-1])
 
 	else:
 		firstBegin, secondBegin = involvedBkPtsList[0][0][-1], involvedBkPtsList[1][-1][-1]
 
 		firstContigName , secondContigName = involvedBkPtsList[0][0][-2], involvedBkPtsList[1][0][-2]
 
-		# print "reverse: firstContigName, secondContigName", firstContigName, secondContigName
+		firstAddGroup.append(involvedBkPtsList[0][0])
+
 		for eachitem in newFirstList:
-			newItems.append([ -1 , eachitem[1]  , -1 , eachitem[3], firstContigName , secondBegin - eachitem[-1] + firstBegin])
+			firstAddGroup.append([ -1 , eachitem[1]  , -2- eachitem[2] , eachitem[3], firstContigName , secondBegin - eachitem[-1] + firstBegin])
+
+		firstAddGroup.append(involvedBkPtsList[0][-1])
+		
+		secondAddGroup.append(involvedBkPtsList[1][-1])
 
 		for eachitem in newSecondList:
-			newItems.append([ -1 , eachitem[1] , -1 , eachitem[3], secondContigName, secondBegin - eachitem[-1] + firstBegin])
+			secondAddGroup.append([ -1 , eachitem[1] , -2- eachitem[2] , eachitem[3], secondContigName, secondBegin - eachitem[-1] + firstBegin])
 
-	'''
-	print "involvedBkPtsList"
-	print involvedBkPtsList[0]
-	print involvedBkPtsList[1]
-	print "len(newFirstList), len(newSecondList) : " , len(newFirstList), len(newSecondList)
+		secondAddGroup.append(involvedBkPtsList[1][0])
 
-	print len(newItems)
-	'''
+	firstAddGroupFilter = filterShortSeg(firstAddGroup, thres)
+	secondAddGroupFilter =  filterShortSeg(secondAddGroup, thres)
 
+	newItems = firstAddGroupFilter +  secondAddGroupFilter 
 	return newItems
+
+
+def filterShortSeg(firstAddGroup, thres):
+	newFirstAddGroupFilter = [] 
+	firstAddGroup.sort(key = itemgetter(-2, -1))
+
+	for i in range(1, len(firstAddGroup) - 1):
+		if abs(firstAddGroup[i][-1] - firstAddGroup[i-1][-1]) >= thres and abs(firstAddGroup[i][-1] - firstAddGroup[-1][-1]) >= thres:
+			newFirstAddGroupFilter.append(firstAddGroup[i])
+
+	return newFirstAddGroupFilter
 
 def filterDuplicate(bkptList):
 
@@ -246,10 +267,8 @@ def addHiddenBkPts(bkpts):
 		toAddPts = toAddPtsFormat(toAddPts, len(bkpts))
 		bkpts = toAddPts + bkpts
 		'''
-
 		toAddPts = toAddPtsFormat(toAddPts, len(bkpts))
 		newBkpts =  toAddPts + bkpts
-
 		bkptsfiltered = filterDuplicate(newBkpts)
 
 	return bkptsfiltered
@@ -269,8 +288,8 @@ def clusterBkPts(newbkts):
 		basicItems.append(mylist[0][3])
 		for i in range(len(mylist)-1):
 			basicItems.append(mylist[i+1][3])
-
-			if abs(mylist[i+1][-1] - mylist[i][-1]) < 60:
+			if abs(mylist[i+1][-1] - mylist[i][-1]) < 60 and mylist[i+1][2] % 2 ==  mylist[i][2] %2:
+			# if abs(mylist[i+1][-1] - mylist[i][-1]) < 1000:
 				mergingPair.append([mylist[i+1][3], mylist[i][3]])
 
 	### Get Use disjoint set union
@@ -317,7 +336,7 @@ def findSeqs(newClusteredBks):
 		tmpSeq = []
 		for eachitem in items:
 			tmpSeq.append(eachitem[0])
-			bkPt2ClustersMapDic[eachitem[0]] = eachitem[3]
+			bkPt2ClustersMapDic[eachitem[0]] = [eachitem[3], eachitem[2]]
 		linearSeqs.append(tmpSeq)
 
 	return linearSeqs, bkPt2ClustersMapDic
@@ -325,7 +344,7 @@ def findSeqs(newClusteredBks):
 def formClusterName(myList, bkPt2ClustersMapDic):
 	newList = []
 	for eachitem in myList:
-		newList.append(bkPt2ClustersMapDic[eachitem])
+		newList.append(bkPt2ClustersMapDic[eachitem][0])
 	return newList 
 
 def filterList(myList):
@@ -349,6 +368,7 @@ def findInOutList(linearSeqs, bkPt2ClustersMapDic):
 		4. Report a pair then 
 
 	'''
+
 	endAppendedList = []
 	clusterFilledList = []
 	indicesPairList = []
@@ -363,28 +383,26 @@ def findInOutList(linearSeqs, bkPt2ClustersMapDic):
 
 	maxIndex += 1
 
-
 	for eachSeq in linearSeqs : 
 		
-		bkPt2ClustersMapDic[maxIndex] = maxIndex
+		bkPt2ClustersMapDic[maxIndex] = [maxIndex, 1]
 		tmpSeq = [maxIndex ]	
 		maxIndex += 1
 
 		for eachitem in eachSeq :
 			tmpSeq.append(eachitem)
 
-		bkPt2ClustersMapDic[maxIndex] = maxIndex
+		bkPt2ClustersMapDic[maxIndex] = [maxIndex, 0]
 		tmpSeq.append(maxIndex)
 		maxIndex += 1
 
 		endAppendedList.append(tmpSeq)
 
 	### Forming clusterFilledList
-
 	for eachSeq in endAppendedList:
 		tmpSeq = []
 		for eachitem in eachSeq : 
-			tmpSeq.append(bkPt2ClustersMapDic[eachitem])
+			tmpSeq.append(bkPt2ClustersMapDic[eachitem][0])
 		clusterFilledList.append(tmpSeq)
 
 
@@ -392,36 +410,131 @@ def findInOutList(linearSeqs, bkPt2ClustersMapDic):
 	### Keep track of the end points 
 	for i in range(len(clusterFilledList)):
 		for j in range(1, len(clusterFilledList[i]) -1):
-			indicesPairList.append([clusterFilledList[i][j-1], clusterFilledList[i][j], i, j])
-	
-	indicesPairList.sort(key = itemgetter(0,1))	
+			indicesPairList.append([clusterFilledList[i][j-1], clusterFilledList[i][j], i, j, 'f'])
+			indicesPairList.append([clusterFilledList[i][j],clusterFilledList[i][j-1] , i, j-1, 'r'])
 
+	#print "indicesPairList", indicesPairList
+	nonRepeatDic = findNonRepeatPairs(bkPt2ClustersMapDic, indicesPairList, endAppendedList) 
+	usedPairDic = {eachitem : True for eachitem in nonRepeatDic}
+
+	# print "usedPairDic", usedPairDic
+
+	indicesPairList.sort(key = itemgetter(0,1))	
 	### Forming indicesPairList
 	for key, items in groupby(indicesPairList, itemgetter(0,1)):
-		inList, outList, prevList, nextList = [], [] , [], []
+		keyStr = str(key[0]) + "_" + str(key[1])
+		
+		if not keyStr in usedPairDic:
+			usedPairDic[keyStr]	 = True
+			revKeyStr = str(key[1]) + "_" + str(key[0])
+			usedPairDic[revKeyStr]	 = True
+			
+			inList, outList, prevList, nextList = [], [] , [], []
+			nonRepeatIn , nonRepeatOut = False, False
 
-		for eachitem in items:
-			i, j = eachitem[-2], eachitem[-1]
-			inItem = endAppendedList[i][j-1]
-			outItem = endAppendedList[i][j]
+			for eachitem in items:
+				i, j, direction = eachitem[-3], eachitem[-2], eachitem[-1]
 
-			prevList.append(clusterFilledList[i][j-2])
-			nextList.append(clusterFilledList[i][j+1])
+				if direction == 'f':
+					inItem = endAppendedList[i][j-1]
+					outItem = endAppendedList[i][j]
 
-			inList.append(inItem)
-			outList.append(outItem)
+					inElm = clusterFilledList[i][j-1]
+					outElm = clusterFilledList[i][j]
+					prevElm = clusterFilledList[i][j-2]
+					nextElm = clusterFilledList[i][j+1]
 
-		inList = filterList(inList)
-		outList = filterList(outList)
+					prevList.append(prevElm)
+					nextList.append(nextElm)
 
-		prevList = filterList(prevList)
-		nextList = filterList(nextList)
+					if str(prevElm) + "_" + str(inElm) in nonRepeatDic:
+						nonRepeatIn = True
 
-		if len(prevList) > 1 and len(nextList) > 1 :
-			setOfChoices.append([inList, outList])
+					if str(outElm) + "_" + str(nextElm) in nonRepeatDic:
+						nonRepeatOut = True
+
+					inList.append(inItem)
+					outList.append(outItem)
+
+				else:
+					inItem = endAppendedList[i][j + 1]
+					outItem = endAppendedList[i][j]
+
+					inElm = clusterFilledList[i][j + 1]
+					outElm = clusterFilledList[i][j]
+
+					prevElm = clusterFilledList[i][j+2]
+					nextElm = clusterFilledList[i][j-1]
+
+					prevList.append(prevElm)
+					nextList.append(nextElm)
 
 
+					if str(prevElm) + "_" + str(inElm) in nonRepeatDic:
+						nonRepeatIn = True
+
+					if str(outElm) + "_" + str(nextElm) in nonRepeatDic:
+						nonRepeatOut = True
+
+					inList.append(inItem)
+					outList.append(outItem)
+
+			inList = filterList(inList)
+			outList = filterList(outList)
+
+			prevList = filterList(prevList)
+			nextList = filterList(nextList)
+
+			# if (len(prevList) > 1 or nonRepeatIn) and (len(nextList) > 1 or nonRepeatOut) :
+			# if (len(prevList) > 1 ) and (len(nextList) > 1 ) :
+			if (len(prevList) > 1 or nonRepeatIn) and (len(nextList) > 1 or nonRepeatOut)  and (len(nextList) > 1 or len(prevList) > 1):
+			
+				setOfChoices.append([inList, outList])
+				print key, inList, outList ,  prevList, nextList, nonRepeatIn, nonRepeatOut
+			
+	print "------------------------------------------------------------------"
 	return setOfChoices 
+
+def findNonRepeatPairs(bkPt2ClustersMapDic, indicesPairList, endAppendedList) :
+	### include both forward and reverse pairs
+	### Use range scan to determine 
+	'''
+	indicesPairList.append([clusterFilledList[i][j-1], clusterFilledList[i][j], i, j, 'f'])
+	indicesPairList.append([clusterFilledList[i][j],clusterFilledList[i][j-1] , i, j-1, 'r'])
+	4 possible cases 
+
+	{0,1} , {2,3}
+	[ ] V
+	[ [ V
+	] ] V
+	] [ X <--- get this out {1,3} --> {0,2}
+
+	'''
+
+	indicesPairList.sort(key = itemgetter(0,1))
+	usedPairDic = {}
+
+	for key , items in groupby(indicesPairList, itemgetter(0,1)):
+		ck, ck2 = False, False
+		for eachitem in items:
+			if eachitem[-1] == 'f':
+				i, j = eachitem[2], eachitem[3]
+				inElem = endAppendedList[i][j-1]
+				outElem = endAppendedList[i][j]
+				if bkPt2ClustersMapDic[inElem][1] in [1,3]  and bkPt2ClustersMapDic[outElem][1] in [0,2]:
+					ck = True
+				elif bkPt2ClustersMapDic[inElem][1] in [0,2]  and bkPt2ClustersMapDic[outElem][1] in [1,3] : 
+					ck2 = True
+				elif bkPt2ClustersMapDic[inElem][1] in [0,2]  and bkPt2ClustersMapDic[outElem][1] in [0,2] : 
+					ck2 = True
+				elif bkPt2ClustersMapDic[inElem][1] in [1,3]  and bkPt2ClustersMapDic[outElem][1] in [1,3] : 
+					ck2 = True
+
+		if ck and not ck2:
+			usedPairDic[str(key[0]) + "_" + str(key[1])] = True
+			usedPairDic[str(key[1]) + "_" + str(key[0])] = True
+
+	return 	usedPairDic
 
 def returnBkPts(combineCutList, newClusteredBks):
 	bkPtDic = {}
@@ -476,7 +589,7 @@ def returnBkPtBoolSat(mummerDataList):
 	repeatIntervalDic = pipelineOriginalMethod(returnFormattedBkPtList)
 	print "len(repeatIntervalDic)", len(repeatIntervalDic)
 
-	#assert(False)
+	# assert(False)
 	return repeatIntervalDic
 
 

@@ -88,7 +88,7 @@ def formSubList(inputList, eachcluster):
 	return [inputList[i] for i in eachcluster]
 
 def findMinSat(inputList):
-	K = 5 
+	K = 7 
 	clusters = findRelatedClusters(inputList)
 	combineCutList = []
 

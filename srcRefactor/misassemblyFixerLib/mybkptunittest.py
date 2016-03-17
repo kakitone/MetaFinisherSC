@@ -13,27 +13,38 @@ class bkFindingAlgoTest(unittest.TestCase):
 		dataList = []
 		dataList.append([1001, 2001, 1001, 2001, 1000, 1000, 100.0, 8000, 8000, 'Contig1', 'Contig2'])
 
-		expectedOutput = [ ['Contig1', 1001] , ['Contig2', 1001] ]
+		expectedOutput =  {'Contig2': [[2001, 2016]], 'Contig1': [[2001, 2016]]}
+		repeatIntervalDic = breakPointFinding.returnBkPtBoolSat(dataList)
 
+		assert(expectedOutput == repeatIntervalDic)
+		
 	def test_Test2(self):
 		dataList = []
 		dataList.append([1001, 2001, 2001, 1001, 1000, 1000, 100.0, 8000, 8000, 'Contig1', 'Contig2'])
 
-		expectedOutput = [ ['Contig1', 1001] , ['Contig2', 2001] ]
+		repeatIntervalDic = breakPointFinding.returnBkPtBoolSat(dataList)
+		expectedOutput = {'Contig2': [[1001, 1016]], 'Contig1': [[2001, 2016]]}
+
+		assert(repeatIntervalDic == expectedOutput)
 
 	def test_Test3(self):
 		dataList = []
 		dataList.append([1001, 2001, 1001, 2001, 1000, 1000, 100.0, 8000, 8000, 'Contig1', 'Contig2'])
 		dataList.append([1501, 2501, 1501, 2501, 1000, 1000, 100.0, 8000, 8000, 'Contig2', 'Contig3'])
+		
+		repeatIntervalDic = breakPointFinding.returnBkPtBoolSat(dataList)
+		expectedOutput = {'Contig3': [[1501, 1516]], 'Contig2': [[1501, 1516]], 'Contig1': [[1501, 1516]]}
 
-		expectedOutput = [ ['Contig1', 1501] , ['Contig2', 1501], ['Contig3', 1501] ]
+		assert(repeatIntervalDic == expectedOutput)
 
 	def test_Test4(self):
 		dataList = []
 		dataList.append([1001, 2001, 1001, 2001, 1000, 1000, 100.0, 8000, 8000, 'Contig1', 'Contig2'])
 		dataList.append([1501, 2501, 2501, 1501, 1000, 1000, 100.0, 8000, 8000, 'Contig2', 'Contig3'])
+		repeatIntervalDic = breakPointFinding.returnBkPtBoolSat(dataList)
+		expectedOutput = {'Contig3': [[2501, 2516]], 'Contig2': [[1501, 1516]], 'Contig1': [[1501, 1516]]}
 
-		expectedOutput = [ ['Contig1', 1501] , ['Contig2', 1501], ['Contig3', 2501] ]
+		assert(repeatIntervalDic == expectedOutput)
 
 	def test_findInOutList(self):
 		'''	
@@ -107,8 +118,8 @@ class bkFindingAlgoTest(unittest.TestCase):
 		
 		expectedBkPtsList = [[0, 0, 0, 0, 'Contig1', 1001], \
 							 [1, 0, 1, 1, 'Contig1', 2001], \
-							 [2, 0, 2, 0, 'Contig2', 2001], \
-							 [3, 0, 3, 1, 'Contig2', 1001]]
+							 [2, 0, 3, 0, 'Contig2', 2001], \
+							 [3, 0, 2, 1, 'Contig2', 1001]]
 
  		assert(bkpts == expectedBkPtsList)
 

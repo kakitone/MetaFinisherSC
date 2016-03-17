@@ -37,13 +37,19 @@ def find(x):
 def formNaturalBkPts(mummerDataList):
 	bkpts = []
 	# dataList.append([1001, 2001, 1001, 2001, 1000, 1000, 100.0, 8000, 8000, 'Contig1', 'Contig2'])
-	#  [key, repeat_index_raw, repeat_end_pt, cluster_index, contig_name, location]
+	# [key, repeat_index_raw, repeat_end_pt, cluster_index, contig_name, location]
 
 	for i in range(len(mummerDataList)):
 		bkpts.append([len(bkpts), i , 0, 2*i, mummerDataList[i][-2], mummerDataList[i][0] ])
 		bkpts.append([len(bkpts), i , 1, 2*i + 1, mummerDataList[i][-2], mummerDataList[i][1] ])
-		bkpts.append([len(bkpts), i , 2, 2*i, mummerDataList[i][-1], mummerDataList[i][2] ])
-		bkpts.append([len(bkpts), i , 3, 2*i + 1, mummerDataList[i][-1], mummerDataList[i][3] ])
+		
+		if mummerDataList[i][2] < mummerDataList[i][3]:
+			bkpts.append([len(bkpts), i , 2, 2*i, mummerDataList[i][-1], mummerDataList[i][2] ])
+			bkpts.append([len(bkpts), i , 3, 2*i + 1, mummerDataList[i][-1], mummerDataList[i][3] ])
+		else:
+			bkpts.append([len(bkpts), i , 3, 2*i , mummerDataList[i][-1], mummerDataList[i][2] ])
+			bkpts.append([len(bkpts), i , 2, 2*i + 1, mummerDataList[i][-1], mummerDataList[i][3] ])
+		
 
 	return bkpts
 
@@ -206,7 +212,6 @@ def fillInHidden(involvedBkPtsList):
 
 	newItems = firstAddGroupFilter +  secondAddGroupFilter 
 	return newItems
-
 
 def filterShortSeg(firstAddGroup, thres):
 	newFirstAddGroupFilter = [] 
@@ -408,13 +413,22 @@ def findInOutList(linearSeqs, bkPt2ClustersMapDic):
 
 	### Forming indicesPairList
 	### Keep track of the end points 
+	indicesPairListWithEnd = []
 	for i in range(len(clusterFilledList)):
 		for j in range(1, len(clusterFilledList[i]) -1):
 			indicesPairList.append([clusterFilledList[i][j-1], clusterFilledList[i][j], i, j, 'f'])
 			indicesPairList.append([clusterFilledList[i][j],clusterFilledList[i][j-1] , i, j-1, 'r'])
+			indicesPairListWithEnd.append([clusterFilledList[i][j-1], clusterFilledList[i][j], i, j, 'f'])
+			indicesPairListWithEnd.append([clusterFilledList[i][j],clusterFilledList[i][j-1] , i, j-1, 'r'])
 
-	#print "indicesPairList", indicesPairList
-	nonRepeatDic = findNonRepeatPairs(bkPt2ClustersMapDic, indicesPairList, endAppendedList) 
+		j = len(clusterFilledList[i]) -1
+		indicesPairListWithEnd.append([clusterFilledList[i][j-1], clusterFilledList[i][j], i, j, 'f'])
+		indicesPairListWithEnd.append([clusterFilledList[i][j],clusterFilledList[i][j-1] , i, j-1, 'r'])
+	
+	# print "indicesPairList", indicesPairList
+	#print "clusterFilledList", clusterFilledList
+
+	nonRepeatDic = findNonRepeatPairs(bkPt2ClustersMapDic, indicesPairListWithEnd, endAppendedList) 
 	usedPairDic = {eachitem : True for eachitem in nonRepeatDic}
 
 	# print "usedPairDic", usedPairDic
@@ -479,11 +493,13 @@ def findInOutList(linearSeqs, bkPt2ClustersMapDic):
 					inList.append(inItem)
 					outList.append(outItem)
 
+			# print prevList, nextList, inList, outList, key
 			inList = filterList(inList)
 			outList = filterList(outList)
 
 			prevList = filterList(prevList)
 			nextList = filterList(nextList)
+
 
 			# if (len(prevList) > 1 or nonRepeatIn) and (len(nextList) > 1 or nonRepeatOut) :
 			# if (len(prevList) > 1 ) and (len(nextList) > 1 ) :
@@ -517,10 +533,13 @@ def findNonRepeatPairs(bkPt2ClustersMapDic, indicesPairList, endAppendedList) :
 	for key , items in groupby(indicesPairList, itemgetter(0,1)):
 		ck, ck2 = False, False
 		for eachitem in items:
+			#print eachitem
 			if eachitem[-1] == 'f':
 				i, j = eachitem[2], eachitem[3]
 				inElem = endAppendedList[i][j-1]
 				outElem = endAppendedList[i][j]
+				# print eachitem ,inElem ,outElem ,bkPt2ClustersMapDic[inElem],bkPt2ClustersMapDic[outElem]
+				
 				if bkPt2ClustersMapDic[inElem][1] in [1,3]  and bkPt2ClustersMapDic[outElem][1] in [0,2]:
 					ck = True
 				elif bkPt2ClustersMapDic[inElem][1] in [0,2]  and bkPt2ClustersMapDic[outElem][1] in [1,3] : 
